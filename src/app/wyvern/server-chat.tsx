@@ -21,9 +21,12 @@ export default function Chat({ serverId }) {
 	const [server, setServer] = useState("");
 	const [messages, setMessages] = useState([]);
 	const messagesEndRef = useRef(null);
+	let boundAgent = false;
   let contact = ContactService.getContact(serverId)
 	let server_name = serverId
 	const router = useRouter();
+
+	const { username, did, agent } = useContext(AgentContext);
 
 	function getMessages(force: boolean) {
 		let mc = ContactService.getMessageHistory(serverId)
@@ -40,8 +43,11 @@ export default function Chat({ serverId }) {
 		}
 		getMessages(server != serverId)
 	}
-
-	const { username, did, agent } = useContext(AgentContext);
+	if (!boundAgent && agent) {
+		console.log("FROSTY", agent)
+		agent.onAnyMessage(getMessages.bind(this));
+		boundAgent = true;
+	}
 
 	function sendMessage(event) {
 		event.preventDefault();
