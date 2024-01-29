@@ -74,20 +74,20 @@ export default function Chat({ serverId }) {
 
 	return (
 		<div
-		className="ps-14 h-full relative min-h-screen"
+		className="ps-14 relative min-h-svh grow"
 		>
 			<div
-			className="flex flex-col min-h-screen max-h-screen"
+			className="flex flex-col min-h-svh max-h-svh"
 			>
 				<div className="grow flex flex-col justify-end overflow-hidden ">
 					<div className="p-4 overflow-y-scroll">
 						<div>
-							Welcome to server: {server_name}
+							Welcome to server: {server_name ?? "Not connected to a server"}
 						</div>
 						<div>
 							User: {username}
 							<br />
-							did: <input value={did} />
+							did: <input value={did} readOnly />
 						</div>
 						{messages.map((message) => {
 							if (message.type === "https://didcomm.org/basicmessage/2.0/message")

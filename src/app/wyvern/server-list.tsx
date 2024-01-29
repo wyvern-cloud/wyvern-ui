@@ -179,7 +179,7 @@ export default function ServerList() {
 	return (
 		<nav
 		id="server-list"
-		className="absolute left-0 top-0 z-[1035] h-full w-14 overflow-visible bg-white shadow-[0_4px_12px_0_rgba(0,0,0,0.07),_0_2px_4px_rgba(0,0,0,0.5)] data-[te-sidebar-hidden='false']:translate-x-0 dark:bg-zink-800"
+		className="absolute left-0 top-0 z-[1035] h-full w-14 overflow-visible bg-white shadow-[0_4px_12px_0_rgba(0,0,0,0.07),_0_2px_4px_rgba(0,0,0,0.5)] data-[te-sidebar-hidden='false']:translate-x-0 dark:bg-slate-500"
 		>
 			<ul className="relative m-0 list-none px-[0.2rem]">
 				{servers.map((server) => {
