@@ -103,6 +103,47 @@ export class DIDPeerResolver implements DIDResolver {
   }
 }
 
+export class DIDWebResolver implements DIDResolver {
+  async resolve(did: DID): Promise<DIDDoc | null> {
+		var path = did.slice(8);
+		path += "/.well-known/did.json";
+    const raw_doc = await fetch(`https://${path}`);
+		var doc = await raw_doc.json();
+		console.log("doc?", doc);
+		var new_methods = []
+		for(const method of doc["verificationMethod"]) {
+			var t = "MultiKey";
+			if (doc["authentication"].includes(method["id"]))
+				t = "Ed25519VerificationKey2020";
+			if (doc["keyAgreement"].includes(method["id"]))
+				t = "X25519KeyAgreementKey2020";
+			var new_method = {
+				...method,
+				type: t,
+			}
+			new_methods.push(new_method);
+		}
+		doc["verificationMethod"] = new_methods;
+    return doc
+  }
+}
+
+export class PrefixResolver implements DIDResolver {
+  constructor() {
+    this.resolver_map = {
+			"did:peer:2": new DIDPeerResolver(),
+			"did:web:": new DIDWebResolver(),
+		}
+  }
+
+  async resolve(did: DID): Promise<DIDDoc | null> {
+		let result = Object.keys(this.resolver_map).filter(resolver => did.startsWith(resolver));
+		const resolved_doc = await this.resolver_map[result[0]].resolve(did);
+		console.log(resolved_doc);
+		return resolved_doc;
+  }
+}
+
 export interface SecretsManager extends SecretsResolver {
   store_secret: (secret: Secret) => void
 }
@@ -216,11 +257,11 @@ export interface DIDCommMessage {
 }
 
 export class DIDComm {
-  private readonly resolver: DIDPeerResolver
+  private readonly resolver: DIDResolver
   private readonly secretsResolver: SecretsManager
 
   constructor() {
-    this.resolver = new DIDPeerResolver()
+    this.resolver = new PrefixResolver()
     this.secretsResolver = new EphemeralSecretsResolver()
   }
 
