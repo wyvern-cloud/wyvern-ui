@@ -77,7 +77,7 @@ export default function Chat({ serverId }) {
 		className="ps-14 relative min-h-svh grow"
 		>
 			<div
-			className="flex flex-col min-h-svh max-h-svh"
+			className="flex flex-col min-h-svh max-h-svh dark:bg-slate-900"
 			>
 				<div className="grow flex flex-col justify-end overflow-hidden ">
 					<div className="p-4 overflow-y-scroll">
@@ -87,7 +87,7 @@ export default function Chat({ serverId }) {
 						<div>
 							User: {username}
 							<br />
-							did: <input value={did} readOnly />
+							did: <input className="dark:bg-slate-800" value={did} readOnly />
 						</div>
 						{messages.map((message) => {
 							if (message.type === "https://didcomm.org/basicmessage/2.0/message")
