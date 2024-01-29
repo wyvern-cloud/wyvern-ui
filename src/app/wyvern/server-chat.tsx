@@ -6,7 +6,7 @@ import { Button, TextInput } from 'flowbite-react';
 
 function MessageElem({ message }) {
 	console.log(message)
-	let sender = message.sender
+	let sender = message.raw?.body?.author ?? message.sender
 	return (
 		<div className="flex">
 			<span className="text-ellipsis overflow-hidden max-w-80 inline-block text-nowrap whitespace-nowrap shrink-0">{sender}</span>
