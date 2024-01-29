@@ -35,6 +35,7 @@ export default function Chat({ serverId }) {
 	}
 
   if (!contact && serverId) {
+		console.log(serverId);
 		router.push("/wyvern/")
   } else if (contact) {
 		server_name = contact.label ? `${contact.label} - ${contact.did.substr(0,110)}...` : `Unknown Server Name: ${contact.did}`;

@@ -1,3 +1,4 @@
+/*
 import { useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import { AgentContext } from "./contexts.tsx";
@@ -21,3 +22,4 @@ export default function About() {
 		</div>
 	);
 }
+// */

@@ -3,7 +3,7 @@ import { generateProfile } from "./lib/profile.ts";
 
 export const AgentContext = createContext(null)
 
-export const AgentProvider = (props) => {
+export const AgentProvider = (props: object) => {
 	const [username, setUsername] = useState("");
 	const [did, setDid] = useState("")
 	const [agent, setAgent] = useState();
@@ -12,7 +12,7 @@ export const AgentProvider = (props) => {
 		import("./lib/agent.ts").then((module) => {
 			let my_agent = module.default;
 			if (my_agent?.profile) return;
-			const profile = generateProfile({ label: null })
+			const profile = generateProfile({ label: undefined })
 			profile.label = `${profile.label} (Wyvern Client)`;
 			if (!my_agent.profile) my_agent.setupProfile(profile)
 			setUsername(my_agent.profile.label);

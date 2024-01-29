@@ -4,6 +4,9 @@ import ServerChat from "./server-chat.tsx";
 import { AgentProvider } from "./contexts.tsx";
 import { useRouter } from 'next/navigation';
 import { useState, Suspense } from 'react';
+export const dynamic = 'force-dynamic'
+import { useSearchParams } from 'next/navigation'
+import { useQueryState } from 'next-usequerystate'
 
 /*
   oninit(vnode: m.Vnode<ProfileAttributes>) {
@@ -27,13 +30,26 @@ import { useState, Suspense } from 'react';
   }
  */
 
+function RenderChat() {
+	//const searchParams = useSearchParams()
+	//const serverId = searchParams.get('id')
+	const [serverId, setServerId] = useQueryState('id', {defaultValue: null})
+	return (
+		<div
+		className="flex max-h-screen"
+		>
+			<ServerList setServerId={setServerId} />
+			<ServerChat serverId={serverId} />
+		</div>
+	)
+}
+
 export default function Home(props) {
 	const router = useRouter();
 	return (
 		<Suspense>
 			<AgentProvider>
-				<ServerList />
-				<ServerChat serverId={props.searchParams.id} />
+				<RenderChat />
 			</AgentProvider>
 		</Suspense>
 	);
