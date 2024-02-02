@@ -41,6 +41,10 @@ function AddServer() {
 		onCloseModal();
 	}
 
+	function onDefault() {
+		setDid('did:web:frostyfrog.net');
+	}
+
   return (
     <>
       <Modal className="z-[1038]" dismissible show={openModal} size="md" onClose={onCloseModal} initialFocus={didInputRef}>
