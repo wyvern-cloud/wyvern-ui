@@ -45,7 +45,6 @@ export default function Chat({ serverId }) {
 		getMessages(server != serverId)
 	}
 	if (!boundAgent && agent) {
-		console.log("FROSTY", agent)
 		agent.onAnyMessage(getMessages.bind(this));
 		boundAgent = true;
 	}
@@ -98,7 +97,7 @@ export default function Chat({ serverId }) {
 				</div>
 				<form className="" onSubmit={sendMessage}>
 					<div className="h-12 bg-slate-500 flex items-center">
-						<TextInput className="pl-1 pr-1 grow" rounded disabled={!server_name} value={text} onChange={(e) => setText(e.target.value)} />
+						<TextInput className="pl-1 pr-1 grow" disabled={!server_name} value={text} onChange={(e) => setText(e.target.value)} />
 						<Button type="submit" gradientDuoTone="purpleToBlue">Send</Button>
 					</div>
 				</form>

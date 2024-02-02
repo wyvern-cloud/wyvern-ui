@@ -263,6 +263,7 @@ export class DIDComm {
   constructor() {
     this.resolver = new PrefixResolver()
     this.secretsResolver = new EphemeralSecretsResolver()
+    //this.secretsResolver = new LocalSecretsResolver()
   }
 
   async generateDidForMediator(): Promise<DID> {
