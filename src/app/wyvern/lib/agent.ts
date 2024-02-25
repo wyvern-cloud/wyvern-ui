@@ -6,6 +6,7 @@ import { WorkerCommand, WorkerMessage } from "./workerTypes"
 import eventbus, { EventListenerHandle } from "./eventbus"
 import { IMessage } from "didcomm"
 import { DIDCommMessage, DID } from "./didcomm"
+import {v4 as uuidv4} from 'uuid';
 
 export interface AgentMessage {
   sender: Contact
@@ -18,6 +19,7 @@ const IMPLEMENTED_PROTOCOLS = [
   "https://didcomm.org/trust-ping/2.0",
   "https://didcomm.org/basicmessage/2.0",
   "https://didcomm.org/user-profile/1.0",
+  "https://developer.wyvrn.app/protocols/groupmessage/1.0",
 ]
 
 export class Agent {
@@ -45,6 +47,16 @@ export class Agent {
     if (!ContactService.getContact(message.message.from)) {
       let newContact = { did: message.message.from }
       ContactService.addContact(newContact as Contact)
+      const transaction = this.db.transaction(["contacts"], "readwrite");
+      const objectStore = transaction.objectStore("contacts")
+      ContactService.getContacts().forEach((contact) => {
+        console.warn("Frosty", "adding contact", contact);
+        const request = objectStore.put(contact);
+        request.onsuccess = (event) => {
+          console.warn("frosty", event)
+          // event.target.result === customer.ssn;
+        };
+      });
       let msgToSave = {
         raw: message.message,
         type: message.message.type,
@@ -54,6 +66,12 @@ export class Agent {
         content: message.message.body?.content
       };
       ContactService.addMessage(newContact.did, msgToSave)
+      const transaction2 = this.db.transaction(["messages"], "readwrite");
+      const objectStore2 = transaction2.objectStore("messages")
+      const request = objectStore2.put({contact_did: newContact.did, messages: ContactService.getMessageHistory(newContact.did)});
+      request.onsuccess = (event) => {
+        // event.target.result === customer.ssn;
+      };
       if (
         message.message.type != "https://didcomm.org/user-profile/1.0/profile"
       ) {
@@ -71,6 +89,30 @@ export class Agent {
     this.worker.postMessage(message)
   }
 
+  private checkExistingSecrets(): boolean {
+    const did = localStorage.getItem("wyvrn-did");
+    const mediatedDid = localStorage.getItem("wyvrn-relayed-did");
+    const secrets = localStorage.getItem("wyvrn-secrets");
+    if(!did)
+      return false;
+    this.postMessage({
+      type: "establishSecrets",
+      payload: {
+        did: did,
+        mediatedDid: mediatedDid,
+        savedSecrets: JSON.parse(secrets),
+      }
+    });
+    this.onDidGenerated(mediatedDid)
+    return true;
+  }
+
+  private setSecretsFromLocalStorage({did, mediatedDid, secrets}): void {
+    localStorage.setItem("wyvrn-did", did)
+    localStorage.setItem("wyvrn-relayed-did", mediatedDid)
+    localStorage.setItem("wyvrn-secrets", JSON.stringify(Object.values(secrets)))
+  }
+
   private handleWorkerMessage(e: MessageEvent<WorkerMessage<any>>) {
     console.log("Agent received message: ", e.data.type)
     switch (e.data.type) {
@@ -78,13 +120,54 @@ export class Agent {
         logger.log(e.data.payload.message)
         break
       case "init":
+        const request = indexedDB.open("MyTestDatabase", 1);
+        request.onerror = (event) => {
+          console.error("Why didn't you allow my web app to use IndexedDB?!");
+          console.error(`Database error: ${event.target.errorCode}`);
+        };
+        request.onsuccess = (event) => {
+          this.db = event.target.result;
+          console.warn(this.db);
+          this.db.transaction("contacts").objectStore("contacts").getAll().onsuccess = (event) => {
+            console.warn(event)
+            event.target.result.forEach(contact => {
+              console.error({c: contact})
+              ContactService.addContact(contact);
+            });
+            this.db.transaction("messages").objectStore("messages").getAll().onsuccess = (event) => {
+              event.target.result.forEach(message => {
+                let did = message.contact_did
+                console.warn("messages", message);
+                ContactService.saveMessageHistory(did, message.messages);
+              });
+              console.error(event.target.result)
+              eventbus.emit("contactsImported", {})
+            };
+          };
+        };
+        request.onupgradeneeded = (event) => {
+          const db = event.target.result;
+          this.contactStore = db.createObjectStore("contacts", { keyPath: "did" });
+          this.messageStore = db.createObjectStore("messages", { keyPath: "contact_did" });
+        };
+
+        if(this.checkExistingSecrets())
+          break;
+
         this.postMessage({
           type: "establishMediation",
           payload: { mediatorDid: DEFAULT_MEDIATOR },
         })
         break
+      case "didSecrets":
+        this.setSecretsFromLocalStorage(e.data.payload);
+        break
       case "didGenerated":
         this.onDidGenerated(e.data.payload)
+        this.postMessage({
+          type: "getDidSecrets",
+          payload: {},
+        });
         break
       case "messageReceived":
         this.onMessageReceived(e.data.payload)
@@ -171,12 +254,33 @@ export class Agent {
       message.from == this.profile.did
         ? (this.profile as Contact)
         : ContactService.getContact(message.from)
-    const to =
+    let to =
       message.to[0] == this.profile.did
         ? (this.profile as Contact)
         : ContactService.getContact(message.to[0])
 		console.log("METOOOO", to);
 		console.log("METEEEE", message);
+
+    const did = localStorage.getItem("wyvrn-did");
+    const mediatedDid = localStorage.getItem("wyvrn-relayed-did");
+    if(message.to[0] == did)
+      return;
+
+    if(!to) {
+      to = {did: message.to[0]} as Contact;
+      debugger;
+      ContactService.addContact(to);
+      const transaction = this.db.transaction(["contacts"], "readwrite");
+      const objectStore = transaction.objectStore("contacts")
+      ContactService.getContacts().forEach((contact) => {
+        console.warn("Frosty", "adding contact", contact);
+        const request = objectStore.put(contact);
+        request.onsuccess = (event) => {
+          console.warn("frosty", event)
+          // event.target.result === customer.ssn;
+        };
+      });
+    }
 
     if (ContactService.getContact(message.from)) {
       let fromName = message.from
@@ -185,12 +289,19 @@ export class Agent {
       }
       ContactService.addMessage(message.from, {
         sender: fromName,
+        id: uuidv4(),
         receiver: to.label || to.did,
         timestamp: new Date(),
         content: message.body.content,
         type: message.type,
         raw: message,
       })
+      const transaction = this.db.transaction(["messages"], "readwrite");
+      const objectStore = transaction.objectStore("messages")
+      const request = objectStore.put({contact_did: from.did, messages: ContactService.getMessageHistory(from.did)});
+      request.onsuccess = (event) => {
+        // event.target.result === customer.ssn;
+      };
     }
     eventbus.emit("messageReceived", { sender: from, receiver: to, message })
     eventbus.emit(message.type, { sender: from, receiver: to, message })
@@ -224,8 +335,26 @@ export class Agent {
       type: "sendMessage",
       payload: { to: contact.did, message },
     })
+    if(message.type == "https://didcomm.org/basicmessage/2.0/message") {
+      internalMessage.type = "https://developer.wyvrn.app/protocols/groupmessage/1.0/message";
+      internalMessage.raw = {
+        ...message,
+        type: "https://developer.wyvrn.app/protocols/groupmessage/1.0/message",
+        body: {
+          author: this.profile.label,
+          timestamp: Date.now() / 1000,
+          content: message.body.content,
+        }
+      }
+    }
     internalMessage.raw.from = this.profile.did
     ContactService.addMessage(contact.did, internalMessage)
+    const transaction = this.db.transaction(["messages"], "readwrite");
+    const objectStore = transaction.objectStore("messages")
+    const request = objectStore.put({contact_did: contact.did, messages: ContactService.getMessageHistory(contact.did)});
+    request.onsuccess = (event) => {
+      // event.target.result === customer.ssn;
+    };
   }
 
   public async refreshMessages() {
@@ -270,6 +399,16 @@ export class Agent {
 
     contact.label = label
     ContactService.addContact(contact)
+    const transaction = this.db.transaction(["contacts"], "readwrite");
+    const objectStore = transaction.objectStore("contacts")
+    ContactService.getContacts().forEach((contact) => {
+      console.warn("Frosty", "adding contact", contact);
+      const request = objectStore.put(contact);
+      request.onsuccess = (event) => {
+        console.warn("frosty", event)
+        // event.target.result === customer.ssn;
+      };
+    });
   }
 
   async onProfileRequest(message: AgentMessage) {
@@ -317,4 +456,4 @@ export class Agent {
   }
 }
 
-export default new Agent()
+export default Agent

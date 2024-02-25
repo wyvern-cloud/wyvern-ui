@@ -22,6 +22,16 @@ class DIDCommWorker {
     logger.log("Worker initialized.")
   }
 
+	async getDidSecrets() {
+		this.postMessage({type: "didSecrets", payload: {did: this.didForMediator, mediatedDid: this.did, secrets: await this.didcomm.secretsResolver.get_secrets()}})
+	}
+
+  async establishSecrets({ did, mediatedDid, savedSecrets }: { did: string, mediatedDid: string, savedSecrets: Record<string, any> }) {
+		this.didForMediator = did;
+		this.did = mediatedDid;
+		savedSecrets.forEach(secret => this.didcomm.secretsResolver.store_secret(secret))
+	}
+
   async establishMediation({ mediatorDid }: { mediatorDid: string }) {
     logger.log("Establishing mediation with mediator: ", mediatorDid)
     this.didForMediator = await this.didcomm.generateDidForMediator()

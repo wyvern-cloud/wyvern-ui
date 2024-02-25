@@ -42,7 +42,7 @@ function AddServer() {
 	}
 
 	function onDefault() {
-		setDid('did:web:frostyfrog.net');
+		setDid('did:web:colton.wolkins.net');
 	}
 
   return (
@@ -57,7 +57,7 @@ function AddServer() {
               </div>
               <TextInput
                 id="did"
-                placeholder="did:web:frostyfrog.net"
+                placeholder="did:web:colton.wolkins.net"
 								ref={didInputRef}
                 value={did}
                 onChange={(event) => setDid(event.target.value)}
@@ -251,15 +251,22 @@ export default function ServerList() {
 	const { agent } = useContext(AgentContext);
 	useEffect(() => {
 		if (!agent) return;
+		let updateContacts = () => {
+			let contacts = ContactService.getContacts()
+			console.warn("Frosty updating contacts");
+			console.warn(contacts);
+			let ss = contacts.map((contact) => {
+				return {id: contact.did, name: contact.label};
+			});
+			setServers(ss);
+		};
 		agent.onMessage(
 			"https://didcomm.org/user-profile/1.0/profile",
-			() => {
-				let contacts = ContactService.getContacts()
-				let ss = contacts.map((contact) => {
-					return {id: contact.did, name: contact.label};
-				});
-				setServers(ss);
-			}
+			updateContacts
+		)
+		agent.onMessage(
+			"contactsImported",
+			updateContacts
 		)
 	});
 	//if (!onload.includes(funcToOnload))

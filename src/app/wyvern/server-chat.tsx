@@ -8,10 +8,31 @@ function MessageElem({ message }) {
 	console.log(message)
 	let sender = message.raw?.body?.author ?? message.sender
 	return (
-		<div className="flex">
-			<span className="text-ellipsis overflow-hidden max-w-80 inline-block text-nowrap whitespace-nowrap shrink-0">{sender}</span>
-			<span className="inline-block shrink-0 pr-1">:</span>
-			<span className="inline-block">{message.content}</span>
+		<div className="inline-block" style={{textIndent: "-1em", paddingLeft: "1em"}}>
+			<div className="inline">
+				<span className="text-ellipsis overflow-hidden max-w-80 text-nowrap whitespace-nowrap shrink-0">{sender}</span>
+				<span className="inline shrink-0 pr-1">:</span>
+			</div>
+			<span className="inline">{message.content}</span>
+		</div>
+	)
+}
+
+function RichMessageElem({ message }) {
+	console.log(message)
+	let sender = message.raw?.body?.author ?? message.sender
+	let time = new Date(message.raw?.body?.timestamp * 1000);
+	return (
+		<div className="inline-block" style={{textIndent: "-1em", paddingLeft: "1em"}}>
+			<div className="inline">
+				<span className="shrink-1 pr-1 tooltip">
+					{time.toLocaleTimeString()}
+					<span className="tooltiptext">{time.toString()}</span>
+				</span>
+				<span className="text-ellipsis overflow-hidden max-w-80 text-nowrap whitespace-nowrap shrink-0">{sender}</span>
+				<span className="inline shrink-0 pr-1">:</span>
+			</div>
+			<span>{message.content}</span>
 		</div>
 	)
 }
@@ -30,6 +51,7 @@ export default function Chat({ serverId }) {
 
 	function getMessages(force: boolean) {
 		let mc = ContactService.getMessageHistory(serverId)
+		console.log("Frosty messages", mc, messages);
 		if (messages.length != mc.length || force)
 			setMessages([...mc])
 	}
@@ -46,6 +68,7 @@ export default function Chat({ serverId }) {
 	}
 	if (!boundAgent && agent) {
 		agent.onAnyMessage(getMessages.bind(this));
+		agent.onMessage("contactsIndexed", getMessages.bind(this));
 		boundAgent = true;
 	}
 
@@ -73,14 +96,14 @@ export default function Chat({ serverId }) {
 
 	return (
 		<div
-		className="ps-14 relative min-h-svh grow"
+		className="ps-14 relative min-h-svh grow min-w-0"
 		>
 			<div
 			className="flex flex-col min-h-svh max-h-svh dark:bg-slate-900"
 			>
 				<div className="grow flex flex-col justify-end overflow-hidden ">
-					<div className="p-4 overflow-y-scroll">
-						<div>
+					<div className="p-4 overflow-y-scroll grow flex flex-col justify-end">
+						<div className="text-ellipsis overflow-hidden text-nowrap">
 							Welcome to server: {server_name ?? "Not connected to a server"}
 						</div>
 						<div>
@@ -91,6 +114,8 @@ export default function Chat({ serverId }) {
 						{messages.map((message) => {
 							if (message.type === "https://didcomm.org/basicmessage/2.0/message")
 								return <MessageElem key={message.raw.id} message={message} />
+							if (message.type === "https://developer.wyvrn.app/protocols/groupmessage/1.0/message")
+								return <RichMessageElem key={message.raw.id} message={message} />
 						})}
 						<div ref={messagesEndRef} />
 					</div>

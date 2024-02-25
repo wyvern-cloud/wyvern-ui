@@ -7,6 +7,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Wyvern",
   description: "Burninating the countryside!",
+	viewport: "width=device-width, initial-scale=1",
 };
 
 export default function RootLayout({

@@ -103,27 +103,43 @@ export class DIDPeerResolver implements DIDResolver {
   }
 }
 
+var did_web_cache: Record<DID, any> = {};
+
 export class DIDWebResolver implements DIDResolver {
   async resolve(did: DID): Promise<DIDDoc | null> {
-		var path = did.slice(8);
-		path += "/.well-known/did.json";
+    if(did in did_web_cache)
+      return did_web_cache[did];
+
+    var path = did.slice(8);
+    path += "/.well-known/did.json";
     const raw_doc = await fetch(`https://${path}`);
-		var doc = await raw_doc.json();
-		console.log("doc?", doc);
-		var new_methods = []
-		for(const method of doc["verificationMethod"]) {
-			var t = "MultiKey";
-			if (doc["authentication"].includes(method["id"]))
-				t = "Ed25519VerificationKey2020";
-			if (doc["keyAgreement"].includes(method["id"]))
-				t = "X25519KeyAgreementKey2020";
-			var new_method = {
-				...method,
-				type: t,
-			}
-			new_methods.push(new_method);
-		}
-		doc["verificationMethod"] = new_methods;
+    var doc = await raw_doc.json();
+    console.log("doc?", doc);
+    var new_methods = []
+    for(const method of doc["verificationMethod"]) {
+      var t = "MultiKey";
+      if (doc["authentication"].includes(method["id"]))
+        t = "Ed25519VerificationKey2020";
+      if (doc["keyAgreement"].includes(method["id"]))
+        t = "X25519KeyAgreementKey2020";
+      var new_method = {
+        ...method,
+        type: t,
+      }
+      if(new_method.id.startsWith("#"))
+        new_method.id = new_method.controller + new_method.id
+      new_methods.push(new_method);
+    }
+    doc["verificationMethod"] = new_methods;
+    doc["keyAgreement"].forEach((value: string, index: number, arr: Array<string>) => {
+      if(value.startsWith("#"))
+        arr[index] = did + value
+    });
+    doc["authentication"].forEach((value: string, index: number, arr: Array<string>) => {
+      if(value.startsWith("#"))
+        arr[index] = did + value
+    });
+    did_web_cache[did] = doc;
     return doc
   }
 }
@@ -145,7 +161,8 @@ export class PrefixResolver implements DIDResolver {
 }
 
 export interface SecretsManager extends SecretsResolver {
-  store_secret: (secret: Secret) => void
+  store_secret: (secret: Secret) => void;
+  get_secrets: () => Promise<Record<string, Secret>>;
 }
 
 export class LocalSecretsResolver implements SecretsManager {
@@ -157,6 +174,10 @@ export class LocalSecretsResolver implements SecretsManager {
       localStorage.setItem(this.storageKey, JSON.stringify({}))
     }
   }
+
+	async get_secrets(): Record<string, Secret> {
+    return JSON.parse(localStorage.getItem(this.storageKey));
+	}
 
   private static createError(message: string, name: string): Error {
     const e = new Error(message)
@@ -211,6 +232,10 @@ export class EphemeralSecretsResolver implements SecretsManager {
     e.name = name
     return e
   }
+
+	async get_secrets(): Record<string, Secret> {
+    return this.secrets;
+	}
 
   async get_secret(secret_id: string): Promise<Secret | null> {
     try {
@@ -324,6 +349,8 @@ export class DIDComm {
     const service = services.filter((s: Service) =>
       s.serviceEndpoint.uri.startsWith("http")
     )[0]
+    if(!service)
+      return undefined;
     return {
       id: service.id,
       service_endpoint: service.serviceEndpoint.uri,
