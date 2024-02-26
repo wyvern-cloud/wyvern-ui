@@ -3,17 +3,19 @@ import { useRouter } from 'next/navigation';
 import { AgentContext } from "./contexts.tsx";
 import { default as ContactService, Contact, Message } from "./lib/contacts";
 import { Button, TextInput } from 'flowbite-react';
+import { marked } from "marked";
+import DOMPurify from 'dompurify'
 
 function MessageElem({ message }) {
 	console.log(message)
 	let sender = message.raw?.body?.author ?? message.sender
 	return (
-		<div className="inline-block" style={{textIndent: "-1em", paddingLeft: "1em"}}>
-			<div className="inline">
-				<span className="text-ellipsis overflow-hidden max-w-80 text-nowrap whitespace-nowrap shrink-0">{sender}</span>
+		<div className="inline-block chat-message" style={{textIndent: "-1em", paddingLeft: "1em"}}>
+			<div className="inline indent-[initial] prefix">
+				<span className="text-ellipsis overflow-hidden max-w-80 text-nowrap whitespace-nowrap shrink-0 username">{sender}</span>
 				<span className="inline shrink-0 pr-1">:</span>
 			</div>
-			<span className="inline">{message.content}</span>
+			<span className="inline indent-[initial]">{message.content}</span>
 		</div>
 	)
 }
@@ -23,16 +25,16 @@ function RichMessageElem({ message }) {
 	let sender = message.raw?.body?.author ?? message.sender
 	let time = new Date(message.raw?.body?.timestamp * 1000);
 	return (
-		<div className="inline-block" style={{textIndent: "-1em", paddingLeft: "1em"}}>
-			<div className="inline">
-				<span className="shrink-1 pr-1 tooltip">
+		<div className="inline-block chat-message" style={{textIndent: "-1em", paddingLeft: "1em"}}>
+			<div className="inline indent-[initial] prefix">
+				<span className="shrink-1 pr-1 tooltip timestamp">
 					{time.toLocaleTimeString()}
 					<span className="tooltiptext">{time.toString()}</span>
 				</span>
-				<span className="text-ellipsis overflow-hidden max-w-80 text-nowrap whitespace-nowrap shrink-0">{sender}</span>
+				<span className="text-ellipsis overflow-hidden max-w-80 text-nowrap whitespace-nowrap shrink-0 username">{sender}</span>
 				<span className="inline shrink-0 pr-1">:</span>
 			</div>
-			<span>{message.content}</span>
+			<span dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(marked.parseInline(message.content))}}></span>
 		</div>
 	)
 }
@@ -99,10 +101,10 @@ export default function Chat({ serverId }) {
 		className="ps-14 relative min-h-svh grow min-w-0"
 		>
 			<div
-			className="flex flex-col min-h-svh max-h-svh dark:bg-slate-900"
+			className="flex flex-col min-h-svh max-h-svh dark:bg-slate-900 justify-end "
 			>
-				<div className="grow flex flex-col justify-end overflow-hidden ">
-					<div className="p-4 overflow-y-scroll grow flex flex-col justify-end">
+				<div className="overflow-x-hidden">
+					<div className="p-4">
 						<div className="text-ellipsis overflow-hidden text-nowrap">
 							Welcome to server: {server_name ?? "Not connected to a server"}
 						</div>
@@ -120,12 +122,14 @@ export default function Chat({ serverId }) {
 						<div ref={messagesEndRef} />
 					</div>
 				</div>
-				<form className="" onSubmit={sendMessage}>
-					<div className="h-12 bg-slate-500 flex items-center">
-						<TextInput className="pl-1 pr-1 grow" disabled={!server_name} value={text} onChange={(e) => setText(e.target.value)} />
-						<Button type="submit" gradientDuoTone="purpleToBlue">Send</Button>
-					</div>
-				</form>
+				{server_name && (
+					<form className="" onSubmit={sendMessage}>
+						<div className="h-12 bg-slate-500 flex items-center">
+							<TextInput className="pl-1 pr-1 grow" disabled={!server_name} value={text} onChange={(e) => setText(e.target.value)} />
+							<Button type="submit" gradientDuoTone="purpleToBlue">Send</Button>
+						</div>
+					</form>
+				)}
 			</div>
 		</div>
 	);

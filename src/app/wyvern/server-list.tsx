@@ -196,8 +196,10 @@ function ServerIcon({ id, picture, name }) {
 function ServerLink({ id, children, name, callback, styles }) {
 	const router = useRouter();
 	const call_callback = (event) => {
-		event.preventDefault();
-		event.stopPropagation();
+		if(callback) {
+			event.preventDefault();
+			event.stopPropagation();
+		}
 		return id ? openServer(id) : callback()
 	}
 	return (
