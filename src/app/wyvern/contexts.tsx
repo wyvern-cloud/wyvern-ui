@@ -53,7 +53,7 @@ export const AgentProvider = (props: object) => {
 	const [did, setDid] = useState("No DID found")
 	const [agent, setAgent] = useState(false);
 	function setupUsername(agent, new_username) {
-		agent.profile.label = `${new_username} (Wyvern Client)`
+		agent.profile.label = `${new_username}`
 		let contacts = ContactService.getContacts()
 		for (let contact of contacts) {
 			agent.sendProfile(contact as Contact)
