@@ -42,7 +42,7 @@ function AddServer() {
 	}
 
 	function onDefault() {
-		setDid('did:web:colton.wolkins.net');
+		setDid('did:web:wyvrn.app');
 	}
 
   return (
@@ -57,7 +57,7 @@ function AddServer() {
               </div>
               <TextInput
                 id="did"
-                placeholder="did:web:colton.wolkins.net"
+                placeholder="did:web:wyvrn.app"
 								ref={didInputRef}
                 value={did}
                 onChange={(event) => setDid(event.target.value)}
