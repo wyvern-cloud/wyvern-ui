@@ -252,7 +252,7 @@ async function onProfileUpdate(message: AgentMessage) {
 export default function ServerList() {
 	let contacts = ContactService.getContacts()
 	let ss = contacts.map((contact) => {
-		return {id: contact.did, name: contact.label};
+		return {id: contact.did, name: contact.label, icon: contact.icon};
 	});
 	const [servers, setServers] = useState(ss)
 	const { agent } = useContext(AgentContext);
@@ -261,7 +261,7 @@ export default function ServerList() {
 		let updateContacts = () => {
 			let contacts = ContactService.getContacts()
 			let ss = contacts.map((contact) => {
-				return {id: contact.did, name: contact.label};
+				return {id: contact.did, name: contact.label, icon: contact.icon};
 			});
 			setServers(ss);
 		};

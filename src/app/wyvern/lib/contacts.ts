@@ -3,6 +3,7 @@ import eventbus from "./eventbus"
 export interface Contact {
   did: string
   label?: string
+  icon?: string
 }
 
 export interface Message {

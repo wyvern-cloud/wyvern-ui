@@ -393,6 +393,17 @@ export class Agent {
       return
     }
 
+    let displayPicture = message.message.body?.profile?.displayPicture
+    if (displayPicture) {
+      let attachments = message.message.attachments;
+      for(let attachment of attachments) {
+        if(attachment.id == displayPicture.substr(1)) {
+          contact.icon = `data:${attachment["media_type"]};base64,${attachment.data.base64}`;
+          break;
+        }
+      }
+    }
+
     contact.label = label
     ContactService.addContact(contact)
     const transaction = this.db.transaction(["contacts"], "readwrite");
