@@ -74,3 +74,7 @@ body {
 .chat-message > .prefix > .username {
 	color: #7d7;
 }
+.chat-message > .message a {
+	text-decoration: underline;
+	color: #99f;
+}

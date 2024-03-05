@@ -16,7 +16,7 @@ function MessageElem({ message }) {
 				<span className="text-ellipsis overflow-hidden max-w-80 text-nowrap whitespace-nowrap shrink-0 username">{sender}</span>
 				<span className="inline shrink-0 pr-1">:</span>
 			</div>
-			<span className="inline indent-[initial]">{message.content}</span>
+			<span className="message">{message.content}</span>
 		</div>
 	)
 }
@@ -35,7 +35,7 @@ function RichMessageElem({ message }) {
 				<span className="text-ellipsis overflow-hidden max-w-80 text-nowrap whitespace-nowrap shrink-0 username">{sender}</span>
 				<span className="inline shrink-0 pr-1">:</span>
 			</div>
-			<span dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(marked.parseInline(message.content))}}></span>
+			<span className="message" dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(marked.parseInline(message.content, {breaks: true}))}}></span>
 		</div>
 	)
 }
@@ -115,7 +115,7 @@ export default function Chat({ serverId }) {
 			className="flex flex-col min-h-svh max-h-svh dark:bg-slate-900 justify-end "
 			>
 				<div className="overflow-x-hidden">
-					<div className="p-4">
+					<div className="p-4 flex flex-col">
 						<div className="text-ellipsis overflow-hidden text-nowrap">
 							Welcome to server: {server_name ?? "Not connected to a server"}
 						</div>
