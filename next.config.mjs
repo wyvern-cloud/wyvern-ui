@@ -27,7 +27,7 @@ const nextConfig = {
     // !! WARN !!
     ignoreBuildErrors: true,
   },
-	basePath: '/wyvern',
+	basePath: '',
 	experimental: {
 		windowHistorySupport: true,
 	},
