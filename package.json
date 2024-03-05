@@ -23,6 +23,7 @@
     "next-usequerystate": "^1.16.0",
     "react": "^18",
     "react-dom": "^18",
+    "react-textarea-autosize": "^8.5.3",
     "uuid": "^9.0.1"
   },
   "devDependencies": {

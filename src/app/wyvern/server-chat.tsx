@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation';
 import { AgentContext } from "./contexts.tsx";
 import { default as ContactService, Contact, Message } from "./lib/contacts";
 import { Button, TextInput } from 'flowbite-react';
+import TextareaAutosize from 'react-textarea-autosize';
 import { marked } from "marked";
 import DOMPurify from 'dompurify'
 
@@ -36,6 +37,17 @@ function RichMessageElem({ message }) {
 			</div>
 			<span dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(marked.parseInline(message.content))}}></span>
 		</div>
+	)
+}
+
+function Chatbox({ sendMessage, serverName, text, setText }) {
+	return (
+		<form className="" onSubmit={sendMessage}>
+			<div className="h-12 bg-slate-500 flex items-center">
+				<TextareaAutosize minRows="1" maxRows="6" className="pl-1 pr-1 grow" disabled={!serverName} value={text} onChange={(e) => setText(e.target.value)} />
+				<Button type="submit" gradientDuoTone="purpleToBlue">Send</Button>
+			</div>
+		</form>
 	)
 }
 
@@ -122,12 +134,7 @@ export default function Chat({ serverId }) {
 					</div>
 				</div>
 				{server_name && (
-					<form className="" onSubmit={sendMessage}>
-						<div className="h-12 bg-slate-500 flex items-center">
-							<TextInput className="pl-1 pr-1 grow" disabled={!server_name} value={text} onChange={(e) => setText(e.target.value)} />
-							<Button type="submit" gradientDuoTone="purpleToBlue">Send</Button>
-						</div>
-					</form>
+					<Chatbox sendMessage={sendMessage} serverName={server_name} text={text} setText={setText} />
 				)}
 			</div>
 		</div>
