@@ -53,7 +53,6 @@ export default function Chat({ serverId }) {
 
 	function getMessages(force: boolean) {
 		let mc = ContactService.getMessageHistory(serverId)
-		console.log("Frosty messages", mc, messages);
 		if (messages.length != mc.length || force)
 			setMessages([...mc])
 	}

@@ -50,10 +50,8 @@ export class Agent {
       const transaction = this.db.transaction(["contacts"], "readwrite");
       const objectStore = transaction.objectStore("contacts")
       ContactService.getContacts().forEach((contact) => {
-        console.warn("Frosty", "adding contact", contact);
         const request = objectStore.put(contact);
         request.onsuccess = (event) => {
-          console.warn("frosty", event)
           // event.target.result === customer.ssn;
         };
       });
@@ -273,10 +271,8 @@ export class Agent {
       const transaction = this.db.transaction(["contacts"], "readwrite");
       const objectStore = transaction.objectStore("contacts")
       ContactService.getContacts().forEach((contact) => {
-        console.warn("Frosty", "adding contact", contact);
         const request = objectStore.put(contact);
         request.onsuccess = (event) => {
-          console.warn("frosty", event)
           // event.target.result === customer.ssn;
         };
       });
@@ -402,10 +398,8 @@ export class Agent {
     const transaction = this.db.transaction(["contacts"], "readwrite");
     const objectStore = transaction.objectStore("contacts")
     ContactService.getContacts().forEach((contact) => {
-      console.warn("Frosty", "adding contact", contact);
       const request = objectStore.put(contact);
       request.onsuccess = (event) => {
-        console.warn("frosty", event)
         // event.target.result === customer.ssn;
       };
     });

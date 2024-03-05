@@ -260,8 +260,6 @@ export default function ServerList() {
 		if (!agent) return;
 		let updateContacts = () => {
 			let contacts = ContactService.getContacts()
-			console.warn("Frosty updating contacts");
-			console.warn(contacts);
 			let ss = contacts.map((contact) => {
 				return {id: contact.did, name: contact.label};
 			});
