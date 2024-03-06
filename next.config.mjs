@@ -31,6 +31,9 @@ const nextConfig = {
 	experimental: {
 		windowHistorySupport: true,
 	},
+	images: {
+		unoptimized: true,
+	},
 };
 
 export default nextConfig;
