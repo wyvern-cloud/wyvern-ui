@@ -1,0 +1,35 @@
+{
+	"short_name": "Wyvern",
+	"name": "Wyvern: Where communities thrive~",
+	"display": "standalone",
+	"display_override": ["window-controls-overlay"],
+	"theme_color": "#3367D6",
+	"start_url": "/wyvern",
+	"icons": [
+		{
+			"src": "/pwa/icons-vector.svg",
+			"type": "image/svg+xml",
+			"sizes": "512x512"
+		}
+	],
+	"id": "/wyvern?source=pwa",
+	"background_color": "#3367D6",
+	"scope": "/wyvern",
+	"shortcuts": [
+		{
+			"name": "How's the weather today?",
+			"short_name": "Today",
+			"description": "View weather information for today",
+			"url": "/wyvern/today?source=pwa",
+			"icons": [{ "src": "/wyvern/images/today.png", "sizes": "192x192" }]
+		},
+		{
+			"name": "How's the weather tomorrow?",
+			"short_name": "Tomorrow",
+			"description": "View weather information for tomorrow",
+			"url": "/wyvern/tomorrow?source=pwa",
+			"icons": [{ "src": "/wyvern/images/tomorrow.png", "sizes": "192x192" }]
+		}
+	],
+	"description": "Weather forecast information"
+}
