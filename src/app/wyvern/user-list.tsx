@@ -96,9 +96,9 @@ function renderUserList(servers) {
 		let ar = getHoistRole(a.roles);
 		let br = getHoistRole(b.roles);
 		if (!ar || !br) {
-			if(ar)
+			if (ar?.hoist)
 				return -1;
-			if(br)
+			else if (br?.hoist)
 				return 1;
 			if(a.name > b.name)
 				return 1;
@@ -112,10 +112,6 @@ function renderUserList(servers) {
 			if (ar.id > br.id)
 				return 1;
 		}
-		else if (ar?.hoist)
-			return -1;
-		else if (br?.hoist)
-			return 1;
 		if(a.name > b.name)
 			return 1;
 		if(b.name > a.name)
@@ -130,7 +126,7 @@ function renderUserList(servers) {
 			elements.push(<div key="role-empty" className="content-center text-center"><span>Online</span></div>);
 			seenHoistedRoles.push(-1);
 		}
-		elements.push(<Server key={server.id} server={server} />);
+		elements.push(<div dataUserId={server.id}><Server key={server.id} server={server} /></div>);
 	})
 	return elements;
 }
