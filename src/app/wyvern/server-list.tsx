@@ -183,12 +183,22 @@ function openSettings() {
 	setSettingsModal(true);
 }
 
-function openServer(agent, id) {
-	const message = {
-		type: "https://didcomm.org/basicmessage/2.0/message",
+async function openServer(agent, id) {
+	const delay = ms => new Promise(res => setTimeout(res, ms));
+	let message = {
+		type: "https://developer.wyvrn.app/protocols/serverinfo/1.0/request-role-list",
 		lang: "en",
 		body: {
-			content: "/refresh-users",
+			content: "",
+		},
+	}
+	agent.sendMessage(id, message)
+	await delay(500);
+	message = {
+		type: "https://developer.wyvrn.app/protocols/serverinfo/1.0/request-user-list",
+		lang: "en",
+		body: {
+			content: "",
 		},
 	}
 	agent.sendMessage(id, message)
@@ -211,13 +221,13 @@ function ServerIcon({ id, picture, name }) {
 
 function ServerLink({ agent, id, children, name, callback, styles }) {
 	const router = useRouter();
-	const call_callback = (event) => {
+	const call_callback = async (event) => {
 		if(callback) {
 			event.preventDefault();
 			event.stopPropagation();
 		}
 		console.log("Opening?", id);
-		id ? openServer(agent, id) : callback()
+		id ? (await openServer(agent, id)) : callback()
 		return false;
 	}
 	return (
