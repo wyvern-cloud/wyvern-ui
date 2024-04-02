@@ -155,10 +155,15 @@ export class PrefixResolver implements DIDResolver {
   }
 
   async resolve(did: DID): Promise<DIDDoc | null> {
-		let result = Object.keys(this.resolver_map).filter(resolver => did.startsWith(resolver));
-		const resolved_doc = await this.resolver_map[result[0]].resolve(did);
-		console.log(resolved_doc);
-		return resolved_doc;
+    try {
+      let result = Object.keys(this.resolver_map).filter(resolver => did.startsWith(resolver));
+      const resolved_doc = await this.resolver_map[result[0]].resolve(did);
+      console.log(resolved_doc);
+      return resolved_doc;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
   }
 }
 

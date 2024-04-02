@@ -160,16 +160,21 @@ class DIDCommWorker {
     switch (message.type) {
       case "https://didcomm.org/messagepickup/3.0/status":
         if (message.body.message_count > 0) {
-          const [msg, meta] = await this.didcomm.sendMessageAndExpectReply(
-            message.from,
-            this.didForMediator,
-            {
-              type: "https://didcomm.org/messagepickup/3.0/delivery-request",
-              body: {
-                limit: message.body.message_count,
-              },
-            }
-          )
+          try {
+            const [msg, meta] = await this.didcomm.sendMessageAndExpectReply(
+              message.from,
+              this.didForMediator,
+              {
+                type: "https://didcomm.org/messagepickup/3.0/delivery-request",
+                body: {
+                  limit: message.body.message_count,
+                },
+              }
+            )
+          } catch(error) {
+            console.error("Fatal error during message pickup", error);
+            return;
+          }
           const delivery = msg.as_value()
           if (
             delivery.type !== "https://didcomm.org/messagepickup/3.0/delivery"
@@ -222,7 +227,11 @@ class DIDCommWorker {
   }
 
   async sendMessage({ to, message }: { to: string; message: DIDCommMessage }) {
-    await this.didcomm.sendMessage(to, this.did, message)
+    try {
+      await this.didcomm.sendMessage(to, this.did, message)
+    } catch(error) {
+      console.error("Failed to send message:", error);
+    }
   }
 
   postMessage<T>(message: WorkerMessage<T>) {
@@ -251,4 +260,5 @@ console.log("Created worker: ", handler)
 ctx.onmessage = async (event: MessageEvent) => {
   await handler.route(event)
 }
+ctx.onerror = console.error;
 handler.init()

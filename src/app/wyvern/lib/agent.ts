@@ -332,6 +332,8 @@ export class Agent {
       payload: { to: contact.did, message },
     })
     if(message.type == "https://didcomm.org/basicmessage/2.0/message") {
+      if(message.body.content.startsWith("/"))
+        return;
       internalMessage.type = "https://developer.wyvrn.app/protocols/groupmessage/1.0/message";
       internalMessage.raw = {
         ...message,
