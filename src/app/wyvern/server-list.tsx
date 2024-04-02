@@ -217,7 +217,8 @@ function ServerLink({ agent, id, children, name, callback, styles }) {
 			event.stopPropagation();
 		}
 		console.log("Opening?", id);
-		return id ? openServer(agent, id) : callback()
+		id ? openServer(agent, id) : callback()
+		return false;
 	}
 	return (
 		<li className={["relative", styles].join(" ")}>
