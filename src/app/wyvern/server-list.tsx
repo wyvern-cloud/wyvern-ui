@@ -126,6 +126,11 @@ function SettingsMenu() {
 		onUpdateDisplayName();
 		onCloseModal();
 	}
+	function onDelete(event) {
+		agent.DEVELOPER_clearDataBase();
+		onCloseModal();
+		location.reload();
+	}
 
   return (
     <>
@@ -157,6 +162,9 @@ function SettingsMenu() {
             </div>
             <div className="w-full">
               <Button onClick={onSave} disabled={!validName}>Update Settings</Button>
+            </div>
+            <div className="w-full">
+              <Button className="w-full bg-red-600 enabled:hover:bg-red-950 enabled:hover:text-slate-100 dark:bg-red-950 dark:text-slate-100 dark:enabled:hover:bg-red-600 dark:enabled:hover:text-white-900" onClick={onDelete}>Dev: Delete Local Data!</Button>
             </div>
           </div>
         </Modal.Body>

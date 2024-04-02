@@ -111,6 +111,14 @@ export class Agent {
     localStorage.setItem("wyvrn-secrets", JSON.stringify(Object.values(secrets)))
   }
 
+  public DEVELOPER_clearDataBase() {
+    const request = indexedDB.deleteDatabase("MyTestDatabase");
+    localStorage.removeItem("wyvrn-did");
+    localStorage.removeItem("wyvrn-relayed-did");
+    localStorage.removeItem("wyvrn-secrets");
+    localStorage.removeItem("profile");
+  }
+
   private handleWorkerMessage(e: MessageEvent<WorkerMessage<any>>) {
     console.log("Agent received message: ", e.data.type)
     switch (e.data.type) {
