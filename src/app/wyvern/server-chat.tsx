@@ -56,6 +56,7 @@ export default function Chat({ serverId }) {
 	const [server, setServer] = useState("");
 	const [messages, setMessages] = useState([]);
 	const messagesEndRef = useRef(null);
+	let contacts = ContactService.getContacts();
 	let boundAgent = false;
   let contact = ContactService.getContact(serverId)
 	let server_name = serverId
@@ -116,20 +117,35 @@ export default function Chat({ serverId }) {
 			>
 				<div className="overflow-x-hidden">
 					<div className="p-4 flex flex-col">
-						<div className="text-ellipsis overflow-hidden text-nowrap">
-							Welcome to server: {server_name ?? "Not connected to a server"}
-						</div>
-						<div>
-							User: {username}
-							<br />
-							did: <input className="dark:bg-slate-800" value={did} readOnly />
-						</div>
-						{messages.map((message) => {
-							if (message.type === "https://didcomm.org/basicmessage/2.0/message")
-								return <MessageElem key={message.raw.id} message={message} />
-							if (message.type === "https://developer.wyvrn.app/protocols/groupmessage/1.0/message")
-								return <RichMessageElem key={message.raw.id} message={message} />
-						})}
+						{ serverId ?
+							<>
+								<div className="text-ellipsis overflow-hidden text-nowrap">
+									Welcome to server: {server_name ?? "Not connected to a server"}
+								</div>
+								<div>
+									User: {username}
+									<br />
+									did: <input className="dark:bg-slate-800" value={did} readOnly />
+								</div>
+								{messages.map((message) => {
+									if (message.type === "https://didcomm.org/basicmessage/2.0/message")
+										return <MessageElem key={message.raw.id} message={message} />
+									if (message.type === "https://developer.wyvrn.app/protocols/groupmessage/1.0/message")
+										return <RichMessageElem key={message.raw.id} message={message} />
+								})}
+							</> : <>
+								<h1 className="text-4xl font-bold mb-10 text-center">Welcome to Wyvrn!</h1>
+								Welcome to Wyvrn, the free and open-source communication platform. To get started,&nbsp;
+								{ contacts.length == 0 ?
+									<>
+										join a Wyvrn server via the plus icon in the top left-hand corner to join a Wyvrn Community.
+									</> :
+									<>
+										click on a Wyvrn Community via it's community icon on the left-hand side of the screen.
+									</>
+								}
+							</>
+						}
 						<div ref={messagesEndRef} />
 					</div>
 				</div>
