@@ -31,7 +31,7 @@ import { useQueryState } from 'next-usequerystate'
   }
  */
 
-const isMobile = navigator.userAgentData?.mobile ?? false; //resolves true/false
+const isMobile = navigator ? navigator.userAgentData?.mobile : false; //resolves true/false
 
 function RenderChat() {
 	//const searchParams = useSearchParams()
