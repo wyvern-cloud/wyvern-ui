@@ -2,9 +2,9 @@
 import ServerList from "./server-list.tsx";
 import ServerChat from "./server-chat.tsx";
 import UserList from "./user-list.tsx";
-import { AgentProvider } from "./contexts.tsx";
+import { AgentProvider, AgentContext } from "./contexts.tsx";
 import { useRouter } from 'next/navigation';
-import { useState, useRef, Suspense } from 'react';
+import { useState, useContext, useRef, Suspense } from 'react';
 export const dynamic = 'force-dynamic'
 import { useSearchParams } from 'next/navigation'
 import { useQueryState } from 'next-usequerystate'
@@ -74,6 +74,37 @@ function RenderChat() {
 }
  */
 
+	const [userList, setUserList] = useState([])
+	let boundAgent = false;
+	const { agent } = useContext(AgentContext);
+	let roleList = [];
+	function getUsers(msg) {
+		let users = msg.message.body.users.map(user => {
+			user.roles = user?.roles.map(role => {
+				if(roleList.includes(role))
+					return role;
+				let matchedRole = roleList.filter(rl => rl.id == role );
+				if(!matchedRole)
+					return null;
+				return matchedRole[0];
+			}).filter(r => r) ?? [];
+			return user;
+		});
+		users = users.sort((a,b) => (a.last_nom > b.last_nom) ? 1 : ((b.last_nom > a.last_nom) ? -1 : 0));
+		setUserList({
+			serverId: serverId,
+			users: users,
+		});
+	}
+
+	if (!boundAgent && agent) {
+		agent.onMessage("https://developer.wyvrn.app/protocols/serverinfo/1.0/user-list", getUsers.bind(this));
+		agent.onMessage("https://developer.wyvrn.app/protocols/serverinfo/1.0/role-list", (msg) => { roleList = msg.message.body.roles });
+		//agent.onMessage("contactsIndexed", getUsers.bind(this));
+		boundAgent = true;
+	}
+
+
 	return (
 		<div
 		onTouchStart={onTouchStart}
@@ -84,7 +115,7 @@ function RenderChat() {
 			<ServerList setServerId={setServerId} />
 			<ServerChat serverId={serverId} />
 			{serverId && !(isMobile && !showUserList) ?
-				<UserList serverId={serverId} /> : <></>
+				<UserList serverId={serverId} users={userList.serverId == serverId ? userList.users : []} /> : <></>
 			}
 		</div>
 	)
