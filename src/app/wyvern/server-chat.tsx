@@ -144,6 +144,9 @@ export default function Chat({ serverId }) {
 										click on a Wyvrn Community via it's community icon on the left-hand side of the screen.
 									</>
 								}
+								<br />
+								<br />
+								Welcome {username} to Wyvrn.
 							</>
 						}
 						<div ref={messagesEndRef} />
