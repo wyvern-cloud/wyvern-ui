@@ -57,7 +57,7 @@ function Server({ server }) {
 	const router = useRouter();
 			// <ServerIcon picture={server.icon} name={server.name} />
 	return (
-			<Tooltip placement="left" content={server.roles.map(r=><>{r.name}<br /></>)}>
+			<Tooltip placement="left" content={<>{(getHoistRole(server.roles)?.name ?? "No Role")} <br />---<br /> {server.roles.map(r=><>{r.name}<br /></>)}</>}>
 				<div className="flex flex-wrap gap-2 items-center">
 					<Avatar rounded status="busy" statusPosition="bottom-right" />
 					<span style={{color: server.roles[0]?.color ?? "gray"}}>{server.name}</span>
@@ -82,7 +82,15 @@ async function onProfileUpdate(message: AgentMessage) {
 }
 
 function getHoistRole(roles) {
-	for (let r of roles) {
+	let sortedRoles = roles.map((x) => x);
+	sortedRoles.sort((a, b) => {
+		if(a.id < b.id)
+			return -1;
+		if(b.id < a.id)
+			return 1;
+		return 0;
+	});
+	for (let r of sortedRoles) {
 		if (r.hoist)
 			return r;
 	}
@@ -92,30 +100,43 @@ function getHoistRole(roles) {
 function renderUserList(servers) {
 	let seenHoistedRoles = [];
 	let elements = []
-	servers.sort((a, b) => {
+	servers.sort((a,b) => {
+		// Sort by name
+		if(a.name > b.name)
+			return 1;
+		if(b.name > a.name)
+			return -1;
+		return 0;
+	}).sort((a, b) => {
+		// Put hoisted roles at the top
 		let ar = getHoistRole(a.roles);
 		let br = getHoistRole(b.roles);
-		if (!ar || !br) {
-			if (ar?.hoist)
-				return -1;
-			else if (br?.hoist)
-				return 1;
-			if(a.name > b.name)
-				return 1;
-			if(b.name > a.name)
-				return -1;
-			return 0;
-		}
+		if (ar?.hoist)
+			return -1;
+		if (br?.hoist)
+			return 1;
+		return 1;
+	}).sort((a, b) => {
+		let ar = getHoistRole(a.roles);
+		let br = getHoistRole(b.roles);
+		// is this needed?
+		if (!br && ar?.hoist)
+			return -1;
+		if (!ar && br?.hoist)
+			return 1;
+
+		// Sort by hoist role ID/order
 		if (ar?.hoist && br?.hoist) {
 			if (ar.id < br.id)
 				return -1;
 			if (ar.id > br.id)
 				return 1;
 		}
-		if(a.name > b.name)
-			return 1;
-		if(b.name > a.name)
-			return -1;
+		// Sort by name
+		//if(a.name > b.name)
+		//	return 1;
+		//if(b.name > a.name)
+		//	return -1;
 		return 0;
 	}).map((server) => {
 		let role = getHoistRole(server.roles);
