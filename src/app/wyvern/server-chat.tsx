@@ -125,7 +125,12 @@ export default function Chat({ serverId }) {
 								<div>
 									User: {username}
 									<br />
-									did: <input className="dark:bg-slate-800" value={did} readOnly />
+									<div className="flex">
+										<div className="grow shrink-0 pr-2">did:</div>
+										<div className="grow-0 shrink relative w-full">
+											<input className="dark:bg-slate-800 relative w-full block w-full rounded-md border-0 p-1 text-orange-700 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm text-ellipsis" value={did ?? "Missing DID"} readOnly />
+										</div>
+									</div>
 								</div>
 								{messages.map((message) => {
 									if (message.type === "https://didcomm.org/basicmessage/2.0/message")
@@ -147,6 +152,13 @@ export default function Chat({ serverId }) {
 								<br />
 								<br />
 								Welcome {username} to Wyvrn.
+								<br />
+								<div className="flex">
+									<div className="grow shrink-0 pr-2">Your Decentralized ID is:</div>
+									<div className="grow-0 shrink relative w-full">
+										<input className="dark:bg-slate-800 relative w-full block w-full rounded-md border-0 p-1 text-orange-700 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm text-ellipsis" value={did ?? "Missing DID"} readOnly />
+									</div>
+								</div>
 							</>
 						}
 						<div ref={messagesEndRef} />

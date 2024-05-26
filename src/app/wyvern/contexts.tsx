@@ -1,7 +1,9 @@
-import { createContext, useState, useEffect, Suspense } from 'react';
+"use client"
+import { createContext, useState, useEffect } from 'react';
 import { generateProfile } from "./lib/profile.ts";
 import { Agent } from "./lib/agent.ts";
 import { default as ContactService, Contact, Message } from "./lib/contacts";
+import { useRouter } from 'next/navigation';
 
 export const AgentContext = createContext(null)
 
@@ -14,14 +16,6 @@ function initializeAgent() {
 		const local_profile = JSON.parse(localStorage.getItem('profile'));
 		console.log("Found Profile!", local_profile);
 		console.log("Pass Profile!", { label: local_profile?.name });
-		const profile = generateProfile({ label: local_profile?.name })
-		console.log("Create Profile!", my_agent.profile);
-		const new_username = profile.label
-		//profile.label = `${new_username} (Wyvern Client)`;
-		if (!my_agent.profile) my_agent.setupProfile(profile)
-			console.log("Set Profile!", my_agent.profile);
-		//setUsername(new_username);
-		console.log("profile", profile)
 		let onDidGenerated = (did: string) => {
 			my_agent.profile.did = did
 			console.log("My mediated DID", did);
@@ -38,11 +32,11 @@ function initializeAgent() {
 	//});
 		return {
 			agent: my_agent,
-			did: my_agent.profile.did,
-			username: new_username,
+			did: my_agent?.profile?.did,
+			username: "",
 		};
 }
-let initialAgent: Record<string, Any>;
+var initialAgent: Record<string, Any>;
 if (typeof window !== "undefined") {
 	initialAgent = initializeAgent();
 }
@@ -52,6 +46,8 @@ export const AgentProvider = (props: object) => {
 	const [username, setUsername] = useState("");
 	const [did, setDid] = useState("No DID found")
 	const [agent, setAgent] = useState(false);
+	const router = useRouter();
+
 	function setupUsername(agent, new_username) {
 		agent.profile.label = `${new_username}`
 		let contacts = ContactService.getContacts()
@@ -69,12 +65,25 @@ export const AgentProvider = (props: object) => {
 
 	}
 	useEffect(() => {
+		const local_profile = JSON.parse(localStorage.getItem('profile'));
+		if(!local_profile) {
+			router.push("/")
+			return;
+		}
+
 		if (agent)
 			return;
-	initialAgent.agent.onMessage("didGenerated", (did) => setDid(did));
-	setUsername(initialAgent.username);
-	setDid(initialAgent.did);
-	setAgent(initialAgent.agent);
+
+		//initialAgent = initializeAgent();
+		const profile = generateProfile({ label: local_profile?.name });
+		initialAgent.agent.setupProfile(profile);
+		initialAgent.username = profile.label;
+		initialAgent.did = local_profile?.did;
+		initialAgent.agent.startWorker();
+		initialAgent.agent.onMessage("didGenerated", (did) => setDid(did));
+		setUsername(initialAgent.username);
+		setDid(initialAgent.did);
+		setAgent(initialAgent.agent);
 	}, []);
 	useEffect(() => {
 		if (username.length <= 2)
@@ -92,5 +101,5 @@ export const AgentProvider = (props: object) => {
 		onload, setOnload,
 	}
 
-	return <AgentContext.Provider value={value}>{props.children}</AgentContext.Provider>;
+	return <AgentContext.Provider value={value}>{agent ? props.children : ''}</AgentContext.Provider>;
 };

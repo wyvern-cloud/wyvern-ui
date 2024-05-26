@@ -171,17 +171,17 @@ class DIDCommWorker {
                 },
               }
             )
+						const delivery = msg.as_value()
+						if (
+							delivery.type !== "https://didcomm.org/messagepickup/3.0/delivery"
+						) {
+							throw new Error("Unexpected reply: " + delivery.type)
+						}
+						await this.handleMessage(delivery)
           } catch(error) {
             console.error("Fatal error during message pickup", error);
             return;
           }
-          const delivery = msg.as_value()
-          if (
-            delivery.type !== "https://didcomm.org/messagepickup/3.0/delivery"
-          ) {
-            throw new Error("Unexpected reply: " + delivery.type)
-          }
-          await this.handleMessage(delivery)
         }
         break
 

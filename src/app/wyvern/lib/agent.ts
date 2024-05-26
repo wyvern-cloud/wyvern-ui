@@ -27,8 +27,6 @@ export class Agent {
   private worker: Worker
 
   constructor() {
-    this.worker = new Worker(new URL("./worker.ts", import.meta.url))
-    this.worker.onmessage = this.handleWorkerMessage.bind(this)
 		this.onAnyMessage(this.onNewMessageReceived.bind(this))
     this.onAnyMessage(this.handleCoreProtocolMessage.bind(this))
 
@@ -41,6 +39,12 @@ export class Agent {
       this.onProfileRequest.bind(this)
     )
   }
+
+	startWorker() {
+		if(this.worker) return;
+    this.worker = new Worker(new URL("./worker.ts", import.meta.url))
+    this.worker.onmessage = this.handleWorkerMessage.bind(this)
+	}
 
   async onNewMessageReceived(message: AgentMessage) {
     if (message.message.to[0] != this.profile.did) return
@@ -272,18 +276,20 @@ export class Agent {
     if(message.to[0] == did)
       return;
 
-    if(!to) {
-      to = {did: message.to[0]} as Contact;
-      debugger;
-      ContactService.addContact(to);
+    if(!to && message.from != DEFAULT_MEDIATOR) {
+			//if (message.to[0] == mediatedDid) return
+      let frm = {did: message.from} as Contact;
+      //debugger;
+      ContactService.addContact(frm);
       const transaction = this.db.transaction(["contacts"], "readwrite");
       const objectStore = transaction.objectStore("contacts")
-      ContactService.getContacts().forEach((contact) => {
-        const request = objectStore.put(contact);
-        request.onsuccess = (event) => {
-          // event.target.result === customer.ssn;
-        };
-      });
+			if(to.did != did && to.did != mediatedDid)
+				ContactService.getContacts().forEach((contact) => {
+					const request = objectStore.put(contact);
+					request.onsuccess = (event) => {
+						// event.target.result === customer.ssn;
+					};
+				});
     }
 
     if (ContactService.getContact(message.from)) {
@@ -329,7 +335,7 @@ export class Agent {
       typeof to == "string" ? ContactService.getContact(to) : to
     const internalMessage = {
       sender: this.profile.label,
-      receiver: contact.label || contact.did,
+      receiver: contact?.label || contact.did,
       timestamp: new Date(),
       type: message.type,
       content: message.body?.content ?? "",

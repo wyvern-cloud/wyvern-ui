@@ -16,6 +16,7 @@
     "dompurify": "^3.0.9",
     "flowbite": "^2.2.1",
     "flowbite-react": "^0.7.2",
+    "little-state-machine": "^4.8.0",
     "marked": "^12.0.0",
     "multibase": "^4.0.6",
     "multicodec": "^3.2.1",

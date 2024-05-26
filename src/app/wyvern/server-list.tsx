@@ -21,7 +21,7 @@ function AddServer() {
     if (did) {
 			let newContact = {did: did};
       if (!ContactService.getContact(did)) {
-        //ContactService.addContact(newContact as Contact)
+        ContactService.addContact(newContact as Contact)
 				agent.sendProfile(newContact as Contact)
 				agent.requestProfile(newContact as Contact)
 				agent.sendFeatureDiscovery(newContact as Contact)
