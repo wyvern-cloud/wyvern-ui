@@ -1,4 +1,5 @@
-'use client'
+"use client"
+import '../next-reference/globals.css'
 import ServerList from "./server-list.tsx";
 import ServerChat from "./server-chat.tsx";
 import UserList from "./user-list.tsx";
