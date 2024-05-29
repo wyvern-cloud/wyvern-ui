@@ -57,7 +57,7 @@ function Server({ server }) {
 	const router = useRouter();
 			// <ServerIcon picture={server.icon} name={server.name} />
 	return (
-			<Tooltip placement="left" content={<>{(getHoistRole(server.roles)?.name ?? "No Role")} <br />---<br /> {server.roles.map(r=><>{r.name}<br /></>)}</>}>
+			<Tooltip placement="left" content={<>{(getHoistRole(server.roles)?.name ?? "No Role")} <br />---<br /> {server.roles.map(r=><span key={r.id}>{r.name}<br /></span>)}</>}>
 				<div className="flex flex-wrap gap-2 items-center">
 					<Avatar rounded status="busy" statusPosition="bottom-right" />
 					<span style={{color: server.roles[0]?.color ?? "gray"}}>{server.name}</span>
@@ -147,7 +147,7 @@ function renderUserList(servers) {
 			elements.push(<div key="role-empty" className="content-center text-center"><span>Online</span></div>);
 			seenHoistedRoles.push(-1);
 		}
-		elements.push(<div dataUserId={server.id}><Server key={server.id} server={server} /></div>);
+		elements.push(<div key={server.id} data-user-id={server.id}><Server server={server} /></div>);
 	})
 	return elements;
 }
