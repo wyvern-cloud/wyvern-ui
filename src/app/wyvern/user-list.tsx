@@ -172,7 +172,7 @@ export default function UserList({ serverId, users }) {
 	return (
 		<nav
 		id="user-list"
-		className="fixed md:relative right-0 top-0 z-[1035] h-dvh max-h-dvh overflow-y-auto w-dvw md:w-80 overflow-hidden bg-white shadow-[0_4px_12px_0_rgba(0,0,0,0.07),_0_2px_4px_rgba(0,0,0,0.5)] data-[te-sidebar-hidden='false']:translate-x-0 dark:bg-slate-500"
+		className="fixed sm:relative right-0 top-0 z-[1035] h-dvh max-h-dvh overflow-y-auto w-dvw sm:w-60 sm:max-w-60 sm:min-w-60 overflow-hidden bg-white shadow-[0_4px_12px_0_rgba(0,0,0,0.07),_0_2px_4px_rgba(0,0,0,0.5)] data-[te-sidebar-hidden='false']:translate-x-0 dark:bg-slate-500"
 		>
 			<ul className="relative m-0 list-none px-[0.2rem] flex flex-col">
 				{renderUserList(users)}
