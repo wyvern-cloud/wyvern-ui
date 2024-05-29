@@ -6,6 +6,7 @@ import { Button, TextInput } from 'flowbite-react';
 import TextareaAutosize from 'react-textarea-autosize';
 import { marked } from "marked";
 import DOMPurify from 'dompurify'
+import Editor from '@/components/editor'
 
 function MessageElem({ message }) {
 	console.log(message)
@@ -41,10 +42,15 @@ function RichMessageElem({ message }) {
 }
 
 function Chatbox({ sendMessage, serverName, text, setText }) {
+				// <TextareaAutosize minRows="1" maxRows="6" className="pl-1 pr-1 grow" disabled={!serverName} value={text} onChange={(e) => setText(e.target.value)} />
 	return (
-		<form className="" onSubmit={sendMessage}>
-			<div className="h-12 bg-slate-500 flex items-center">
-				<TextareaAutosize minRows="1" maxRows="6" className="pl-1 pr-1 grow" disabled={!serverName} value={text} onChange={(e) => setText(e.target.value)} />
+		<form className="" onSubmit={event => {
+			event.preventDefault();
+			sendMessage(text)
+			setText("");
+		}}>
+			<div className="min-h-12 bg-slate-500 flex items-center">
+				<Editor onSubmit={sendMessage} />
 				<Button type="submit" gradientDuoTone="purpleToBlue">Send</Button>
 			</div>
 		</form>
@@ -86,17 +92,16 @@ export default function Chat({ serverId }) {
 		boundAgent = true;
 	}
 
-	function sendMessage(event) {
-		event.preventDefault();
+	function sendMessage(msg) {
     const message = {
       type: "https://didcomm.org/basicmessage/2.0/message",
       lang: "en",
       body: {
-        content: text,
+        content: msg,
       },
     }
-		setText("");
     agent.sendMessage(serverId, message)
+		getMessages();
 	}
 
 	function scrollToBottom(ref) {
