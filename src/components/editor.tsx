@@ -14,6 +14,10 @@ const Editor = ({ onSubmit }) => {
 	const renderLeaf = useCallback(props => <Leaf {...props} />, [])
 
 	const editor = useMemo(() => withHistory(withReact(createEditor())), []);
+	Prism.languages.markdown.title[1].pattern = /\S.*(?:\n|\r\n?)(?:==+|--+)(?=[ \t]*$)/m
+	Prism.languages.markdown.title[1].pattern = /(?<![^\n]\n?)#.+/m
+	//Prism.languages.markdown.title[1].pattern = /(^\s*)#.+/m
+	console.log("PRISM", Prism.languages.markdown);
 
 	const decorate = useCallback(([node, path]) => {
 		const ranges = [];
@@ -25,7 +29,7 @@ const Editor = ({ onSubmit }) => {
 		const getLength = token => {
 			if(typeof token === 'string')
 				return token.length;
-			else if(typeof token.content == 'string')
+			else if(typeof token.content === 'string')
 				return token.content.length;
 			else
 				return token.content.reduce((l, t) => l + getLength(t), 0);
@@ -66,6 +70,13 @@ const Editor = ({ onSubmit }) => {
 					placeholder="Message for friends"
 					className="py-2 px-4 bg-slate-200 dark:bg-slate-600"
 					onKeyDown={event => {
+						console.log(editor.children);
+						//if (event.key !== 'Enter') return next()
+						//if (options.shift && event.shiftKey === false) return next()
+						if (event.key === 'Enter' && event.shiftKey) {
+							event.preventDefault();
+							return editor.insertText('\n')
+						}
 						if(!event.ctrlKey) {
 							return;
 						}
@@ -143,18 +154,10 @@ const initialValue: Descendant[] = [
     type: 'paragraph',
     children: [
       {
-        text: 'Slate is flexible enough to add **decorations** that can format text based on its content. For example, this editor has **Markdown** preview decorations on it, to make it _dead_ simple to make an editor with built-in Markdown previewing.',
+        text: '',
       },
     ],
-  },
-  {
-    type: 'paragraph',
-    children: [{ text: '## Try it out!' }],
-  },
-  {
-    type: 'paragraph',
-    children: [{ text: 'Try it out for yourself!' }],
-  },
+  }
 ]
 
 export default Editor;
