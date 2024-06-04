@@ -17,6 +17,11 @@ const config: Config = {
       },
     },
   },
+	safelist: [
+		'bg-red-500',
+		'hover:bg-red-600',
+		'z-30',
+	],
   plugins: [
 		require('flowbite/plugin'),
 	],
