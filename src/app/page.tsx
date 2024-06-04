@@ -4,6 +4,41 @@ import Link from 'next/link';
 import styles from "@/app/home.module.css";
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import type { CustomFlowbiteTheme } from "flowbite-react";
+import { Flowbite, Button, Navbar } from "flowbite-react";
+
+const customTheme: CustomFlowbiteTheme = {
+	navbar: {
+		root: {
+			base: "bg-white border-gray-200 dark:bg-gray-900 z-40 relative",
+			inner: {
+				base: "max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4 relative",
+			},
+		},
+		collapse: {
+			list: "flex flex-col font-medium p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700",
+		},
+		link: {
+			active: {
+				on: "block py-2 px-3 md:p-0 text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:dark:text-blue-500",
+				off: "block py-2 px-3 md:p-0 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:dark:hover:text-blue-500 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700",
+			},
+		},
+	},
+  button: {
+		base: "text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800",
+    color: {
+      info: "bg-red-500 hover:bg-red-600",
+    },
+		inner: {
+			base: "",
+		},
+		size: {
+			nav: "text-base",
+			cta: "text-sm",
+		},
+  },
+};
 
 export default function Home() {
 	const router = useRouter();
@@ -13,35 +48,31 @@ export default function Home() {
 			<header>
 				
 
-				<nav className="bg-white border-gray-200 dark:bg-gray-900 z-40 relative">
-					<div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4 relative">
-						<a href="https://flowbite.com/" className="flex items-center space-x-3 rtl:space-x-reverse">
-								<img src="/pwa/icons-vector.svg" className="h-8" style={{filter: "invert(56%) sepia(44%) saturate(4724%) hue-rotate(160deg) brightness(92%) contrast(101%)"}} alt="Wyvrn Logo" />
-								<span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Wyvrn</span>
-						</a>
+				<Flowbite theme={{ theme: customTheme }}>
+					<Navbar fluid rounded className="fixed w-full">
+						<Navbar.Brand href="https://wyvrn.app">
+							<img src="/pwa/icons-vector.svg" style={{filter: "invert(56%) sepia(44%) saturate(4724%) hue-rotate(160deg) brightness(92%) contrast(101%)"}} className="mr-3 h-8 sm:h-8" alt="Wyvrn Logo" />
+							<span className="self-center whitespace-nowrap text-2xl font-semibold dark:text-white">Wyvrn</span>
+						</Navbar.Brand>
 						<div className="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
-								<button type="button" onClick={() => router.push("/onboard")} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Open Wyvrn</button>
-								<button data-collapse-toggle="navbar-cta" type="button" className="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600" aria-controls="navbar-cta" aria-expanded="false">
-									<span className="sr-only">Open main menu</span>
-									<svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
-											<path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 1h15M1 7h15M1 13h15"/>
-									</svg>
-							</button>
+							<Button as={Link} href="/onboard" className="" size="cta">
+								Open Wyvrn
+							</Button>
+							<Navbar.Toggle />
 						</div>
-						<div className="items-center justify-between hidden w-full md:flex md:w-auto md:order-1" id="navbar-cta">
-							<ul className="flex flex-col font-medium p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
-								<li>
-									<a href="#top" className="block py-2 px-3 md:p-0 text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:dark:text-blue-500" aria-current="page">Home</a>
-								</li>
-								<li>
-									<a href="#content" className="block py-2 px-3 md:p-0 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:dark:hover:text-blue-500 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700">About</a>
-								</li>
-								<li>
-									<a href="https://github.com/wyvern-cloud/wyvern-ui" className="block py-2 px-3 md:p-0 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:dark:hover:text-blue-500 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700">Github</a>
-								</li>
-							</ul>
-						</div>
-					</div>
+						<Navbar.Collapse>
+							<Navbar.Link href="#top" active>
+								Home
+							</Navbar.Link>
+							<Navbar.Link href="#content">About</Navbar.Link>
+							<Navbar.Link href="https://github.com/wyvern-cloud/wyvern-ui">Github</Navbar.Link>
+						</Navbar.Collapse>
+					</Navbar>
+				</Flowbite>
+
+				{/* Octo Banner */}
+				<div className="z-30 relative">
+					<div className="min-h-16 min-w-full"></div>
 					<a href="https://github.com/wyvern-cloud/wyvern-ui" className="github-corner relative min-w-full block" aria-label="View source on GitHub">
 						<svg width="80" height="80" viewBox="0 0 250 250" style={{fill: "#151513", color: "#fff", position: "absolute", top: 0, border: 0, right: 0 }} aria-hidden="true">
 							<path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
@@ -50,7 +81,7 @@ export default function Home() {
 						</svg>
 					</a>
 					<style dangerouslySetInnerHTML={{__html: `.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}`}} />
-				</nav>
+				</div>
 
 				<div className={`min-h-[50dvh] ${styles["hero-image"]}`}>
 					<div className={styles["hero-text"]}>
@@ -61,7 +92,7 @@ export default function Home() {
 			</header>
 
 			<main className="flex flex-col items-center justify-between p-8" id="content">
-				<div className="flex min-w-max gap-16 justify-evenly border-4 border-slate-500 rounded-xl p-16">
+				<div className="flex flex-wrap gap-16 justify-evenly border-4 border-slate-500 rounded-xl p-16">
 					<div>
 						<h2 className="text-2xl">A new Era of Messaging</h2>
 						<br />
@@ -69,7 +100,7 @@ export default function Home() {
 							<b>Wyvrn</b> is not just another chat application. It’s a new way to connect with your friends, family, and communities. Wyvrn brings you the power of end-to-end encryption and full control over your data, all without relying on centralized servers.
 						</p>
 					</div>
-					<div>
+					<div className="min-w-max">
 					Image of chibi wyvern here
 					</div>
 				</div>
