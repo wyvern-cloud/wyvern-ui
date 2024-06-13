@@ -51,10 +51,10 @@ function Chatbox({ sendMessage, serverName, text, setText }) {
 		}}>
 			<div className="min-h-12 bg-slate-500 flex items-center">
 				<Editor onSubmit={sendMessage} />
-				<Button type="submit" gradientDuoTone="purpleToBlue">Send</Button>
 			</div>
 		</form>
 	)
+				//<Button type="submit" gradientDuoTone="purpleToBlue">Send</Button>
 }
 
 export default function Chat({ serverId }) {
