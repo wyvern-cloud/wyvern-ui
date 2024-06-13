@@ -77,14 +77,15 @@ function RenderChat() {
  */
 
 	const [userList, setUserList] = useState([])
-	let boundAgent = false;
+	const [boundAgent, setBoundAgent] = useState(false)
 	const { agent } = useContext(AgentContext);
-	let roleList = [];
+	const [roleList, setRoleList] = useState([]);
+	const [users, setUsers] = useState([]);
 	if (serverId) {
 		console.log("old server id:", serverId);
 	}
-	function getUsers(msg) {
-		let users = msg.message.body.users.map(user => {
+	function getUsers() {
+		let userlist = users.list.map(user => {
 			user.roles = user?.roles.map(role => {
 				if(roleList.includes(role))
 					return role;
@@ -95,11 +96,11 @@ function RenderChat() {
 			}).filter(r => r) ?? [];
 			return user;
 		});
-		users = users.sort((a,b) => (a.last_nom > b.last_nom) ? 1 : ((b.last_nom > a.last_nom) ? -1 : 0));
-		setUserList({
+		userlist = userlist.sort((a,b) => (a.last_nom > b.last_nom) ? 1 : ((b.last_nom > a.last_nom) ? -1 : 0));
+		return {
 			serverId: serverId,
-			users: users,
-		});
+			users: userlist,
+		};
 	}
 	function getServers() {
 		let contact = ContactService.getContact(serverId)
@@ -111,10 +112,9 @@ function RenderChat() {
 	}
 
 	if (!boundAgent && agent) {
-		agent.onMessage("https://developer.wyvrn.app/protocols/serverinfo/1.0/user-list", getUsers.bind(this));
-		agent.onMessage("https://developer.wyvrn.app/protocols/serverinfo/1.0/role-list", (msg) => { roleList = msg.message.body.roles });
-		//agent.onMessage("contactsIndexed", getUsers.bind(this));
-		boundAgent = true;
+		agent.onMessage("https://developer.wyvrn.app/protocols/serverinfo/1.0/user-list", msg => { setUsers({serverId: serverId, list: msg.message.body.users}) });
+		agent.onMessage("https://developer.wyvrn.app/protocols/serverinfo/1.0/role-list", (msg) => { setRoleList(msg.message.body.roles) });
+		setBoundAgent(true);
 		agent.onMessage("contactsImported", getServers.bind(this));
 	}
 
@@ -129,7 +129,7 @@ function RenderChat() {
 			<ServerList setServerId={setServerId} />
 			<ServerChat serverId={serverId} />
 			{serverId && !(isMobile && !showUserList) ?
-				<UserList serverId={serverId} users={userList.serverId == serverId ? userList.users : []} /> : <></>
+				<UserList serverId={serverId} users={users?.serverId == serverId ? getUsers()?.users || [] : []} /> : <></>
 			}
 		</div>
 	)

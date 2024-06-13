@@ -63,7 +63,7 @@ export default function Chat({ serverId }) {
 	const [messages, setMessages] = useState([]);
 	const messagesEndRef = useRef(null);
 	let contacts = ContactService.getContacts();
-	let boundAgent = false;
+	let [boundAgent, setBoundAgent] = useState(false);
   let contact = ContactService.getContact(serverId)
 	let server_name = serverId
 	const router = useRouter();
@@ -90,8 +90,8 @@ export default function Chat({ serverId }) {
 	}
 	if (!boundAgent && agent) {
 		agent.onAnyMessage(getMessages.bind(this));
-		agent.onMessage("contactsIndexed", getMessages.bind(this));
-		boundAgent = true;
+		agent.onMessage("contactsImported", getMessages.bind(this));
+		setBoundAgent(true);
 	}
 
 	function sendMessage(msg) {

@@ -137,20 +137,15 @@ export class Agent {
         };
         request.onsuccess = (event) => {
           this.db = event.target.result;
-          console.warn(this.db);
           this.db.transaction("contacts").objectStore("contacts").getAll().onsuccess = (event) => {
-            console.warn(event)
             event.target.result.forEach(contact => {
-              console.error({c: contact})
               ContactService.addContact(contact);
             });
             this.db.transaction("messages").objectStore("messages").getAll().onsuccess = (event) => {
               event.target.result.forEach(message => {
                 let did = message.contact_did
-                console.warn("messages", message);
                 ContactService.saveMessageHistory(did, message.messages);
               });
-              console.error(event.target.result)
               eventbus.emit("contactsImported", {})
             };
           };
@@ -268,8 +263,6 @@ export class Agent {
       message.to[0] == this.profile.did
         ? (this.profile as Contact)
         : ContactService.getContact(message.to[0])
-		console.log("METOOOO", to);
-		console.log("METEEEE", message);
 
     const did = localStorage.getItem("wyvrn-did");
     const mediatedDid = localStorage.getItem("wyvrn-relayed-did");
