@@ -34,7 +34,7 @@ export class LoggerService {
 
   sentMessage(message: MessageRecord) {
     const record = {
-      message: "Sent: " + JSON.stringify(message.message, null, 2),
+      message: "[DIDComm] Sent: " + JSON.stringify(message.message, null, 2),
       timestamp: new Date(),
       topic: LogTopic.LOG_MESSAGE,
     }
@@ -44,7 +44,7 @@ export class LoggerService {
 
   recvMessage(message: MessageRecord) {
     const record = {
-      message: "Received: " + JSON.stringify(message.message, null, 2),
+      message: "[DIDComm] Received: " + JSON.stringify(message.message, null, 2),
       timestamp: new Date(),
       topic: LogTopic.LOG_MESSAGE,
     }

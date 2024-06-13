@@ -121,16 +121,22 @@ class DIDCommWorker {
     }
     this.ws.onopen = async event => {
       console.log("ws onopen", event)
+			const message = {
+				type: "https://didcomm.org/messagepickup/3.0/live-delivery-change",
+				body: {
+					live_delivery: true,
+				},
+			}
       const [plaintext, live, meta] = await this.didcomm.prepareMessage(
         mediatorDid,
         this.didForMediator,
-        {
-          type: "https://didcomm.org/messagepickup/3.0/live-delivery-change",
-          body: {
-            live_delivery: true,
-          },
-        }
+				message
       )
+			logger.sentMessage({
+				to: mediatorDid,
+				from: this.didForMediator,
+				message: message,
+			})
       this.ws.send(live)
       this.postMessage({ type: "connected", payload: {} })
     }
