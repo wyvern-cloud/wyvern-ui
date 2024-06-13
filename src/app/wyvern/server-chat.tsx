@@ -76,10 +76,12 @@ export default function Chat({ serverId }) {
 			setMessages([...mc])
 	}
 
-  if (!contact && serverId) {
-		console.log(serverId);
-		router.push("/wyvern/")
-  } else if (contact) {
+	useEffect(() => {
+		if (!contact && serverId) {
+			router.push("/wyvern/")
+		}
+	}, []);
+	if (contact) {
 		server_name = contact.label ? `${contact.label} - ${contact.did.substr(0,110)}...` : `Unknown Server Name: ${contact.did}`;
 		if(server != serverId) {
 			setServer(serverId)

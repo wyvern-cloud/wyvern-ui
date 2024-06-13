@@ -4,6 +4,7 @@ import ServerList from "./server-list.tsx";
 import ServerChat from "./server-chat.tsx";
 import UserList from "./user-list.tsx";
 import { AgentProvider, AgentContext } from "./contexts.tsx";
+import { default as ContactService } from "./lib/contacts";
 import { useRouter } from 'next/navigation';
 import { useState, useContext, useRef, Suspense } from 'react';
 export const dynamic = 'force-dynamic'
@@ -79,6 +80,9 @@ function RenderChat() {
 	let boundAgent = false;
 	const { agent } = useContext(AgentContext);
 	let roleList = [];
+	if (serverId) {
+		console.log("old server id:", serverId);
+	}
 	function getUsers(msg) {
 		let users = msg.message.body.users.map(user => {
 			user.roles = user?.roles.map(role => {
@@ -97,12 +101,21 @@ function RenderChat() {
 			users: users,
 		});
 	}
+	function getServers() {
+		let contact = ContactService.getContact(serverId)
+		let contacts = ContactService.getContacts()
+		if(contact) {
+			console.log("returning server to id:", contact.did);
+			setServerId(contact.did);
+		}
+	}
 
 	if (!boundAgent && agent) {
 		agent.onMessage("https://developer.wyvrn.app/protocols/serverinfo/1.0/user-list", getUsers.bind(this));
 		agent.onMessage("https://developer.wyvrn.app/protocols/serverinfo/1.0/role-list", (msg) => { roleList = msg.message.body.roles });
 		//agent.onMessage("contactsIndexed", getUsers.bind(this));
 		boundAgent = true;
+		agent.onMessage("contactsImported", getServers.bind(this));
 	}
 
 
