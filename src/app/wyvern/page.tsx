@@ -1,7 +1,8 @@
 "use client"
-import '../wyvrn.css'
+//import '../wyvrn.css'
 import ServerList from "./server-list.tsx";
 import ServerChat from "./server-chat.tsx";
+import ChannelList from "./channel-list.tsx";
 import UserList from "./user-list.tsx";
 import { AgentProvider, AgentContext } from "./contexts.tsx";
 import { default as ContactService } from "./lib/contacts";
@@ -112,7 +113,7 @@ function RenderChat() {
 	}
 
 	if (!boundAgent && agent) {
-		agent.onMessage("https://developer.wyvrn.app/protocols/serverinfo/1.0/user-list", msg => { setUsers({serverId: serverId, list: msg.message.body.users}) });
+		agent.onMessage("https://developer.wyvrn.app/protocols/serverinfo/1.0/user-list", msg => { setUsers({serverId: serverId, list: msg.message.body.users}); console.log("USER LIST", msg); });
 		agent.onMessage("https://developer.wyvrn.app/protocols/serverinfo/1.0/role-list", (msg) => { setRoleList(msg.message.body.roles) });
 		setBoundAgent(true);
 		agent.onMessage("contactsImported", getServers.bind(this));
@@ -127,6 +128,9 @@ function RenderChat() {
 		className="flex max-h-screen"
 		>
 			<ServerList setServerId={setServerId} />
+			{serverId && !(isMobile && true) ?
+				<ChannelList serverId={serverId} /> : <></>
+			}
 			<ServerChat serverId={serverId} />
 			{serverId && !(isMobile && !showUserList) ?
 				<UserList serverId={serverId} users={users?.serverId == serverId ? getUsers()?.users || [] : []} /> : <></>

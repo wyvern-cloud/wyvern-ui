@@ -49,7 +49,7 @@ function Chatbox({ sendMessage, serverName, text, setText }) {
 			sendMessage(text)
 			setText("");
 		}}>
-			<div className="min-h-12 bg-slate-500 flex items-center">
+			<div className="min-h-12 bg-stone-500 flex items-center">
 				<Editor onSubmit={sendMessage} />
 			</div>
 		</form>
@@ -117,10 +117,10 @@ export default function Chat({ serverId }) {
 
 	return (
 		<div
-		className="ps-14 relative min-h-svh grow min-w-0"
+		className="relative min-h-svh grow min-w-0"
 		>
 			<div
-			className="flex flex-col min-h-svh max-h-svh dark:bg-slate-900 justify-end "
+			className="flex flex-col min-h-svh max-h-svh dark:bg-stone-900 justify-end "
 			>
 				<div className="overflow-x-hidden">
 					<div className="p-4 flex flex-col">
@@ -135,7 +135,7 @@ export default function Chat({ serverId }) {
 									<div className="flex">
 										<div className="grow shrink-0 pr-2">did:</div>
 										<div className="grow-0 shrink relative w-full">
-											<input className="dark:bg-slate-800 relative w-full block w-full rounded-md border-0 p-1 text-orange-700 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm text-ellipsis" value={did ?? "Missing DID"} readOnly />
+											<input className="dark:bg-stone-800 relative w-full block w-full rounded-md border-0 p-1 text-orange-700 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm text-ellipsis" value={did ?? "Missing DID"} readOnly />
 										</div>
 									</div>
 								</div>
@@ -163,7 +163,7 @@ export default function Chat({ serverId }) {
 								<div className="flex">
 									<div className="grow shrink-0 pr-2">Your Decentralized ID is:</div>
 									<div className="grow-0 shrink relative w-full">
-										<input className="dark:bg-slate-800 relative w-full block w-full rounded-md border-0 p-1 text-orange-700 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm text-ellipsis" value={did ?? "Missing DID"} readOnly />
+										<input className="dark:bg-stone-800 relative w-full block w-full rounded-md border-0 p-1 text-orange-700 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm text-ellipsis" value={did ?? "Missing DID"} readOnly />
 									</div>
 								</div>
 							</>

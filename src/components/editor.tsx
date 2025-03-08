@@ -118,7 +118,7 @@ const Editor = ({ onSubmit }) => {
 					decorate={decorate}
 					renderLeaf={renderLeaf}
 					placeholder="Message for friends"
-					className="py-2 px-4 bg-slate-200 dark:bg-slate-600"
+					className="py-2 px-4 bg-stone-200 dark:bg-stone-600"
 					onKeyDown={event => {
 						console.log(editor.children);
 						//if (event.key !== 'Enter') return next()
@@ -194,7 +194,7 @@ const Leaf = ({ attributes, children, leaf }) => {
 		`}
 	`;
 	if (leaf.code || leaf["code-snippet"])
-		styles += " dark:bg-slate-800";
+		styles += " dark:bg-stone-800";
 	return (
 		<span
 			{...attributes}
