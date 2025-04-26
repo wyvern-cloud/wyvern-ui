@@ -1,0 +1,169 @@
+.settingsPanel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--dark-bg-color);
+  color: var(--dark-color);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--darker-bg-color);
+  position: sticky;
+  top: 0;
+  background-color: var(--dark-bg-color);
+  z-index: 1;
+}
+
+.header h2 {
+  margin: 0 0 0 16px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: #b9bbbe;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+.closeButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.content {
+  padding: 16px 24px;
+  flex: 1;
+}
+
+.section {
+  margin-bottom: 32px;
+}
+
+.section h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.setting {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.description {
+  color: #b9bbbe;
+  font-size: 14px;
+  margin-top: 4px;
+  margin-bottom: 16px;
+}
+
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 24px;
+  cursor: pointer; /* Add cursor pointer */
+}
+
+.toggle input {
+  opacity: 0; /* Make input invisible */
+  width: 100%; /* Full width of container */
+  height: 100%; /* Full height of container */
+  margin: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2; /* Ensure input is on top */
+  cursor: pointer;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #72767d;
+  transition: .4s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #7289da;
+}
+
+input:checked + .slider:before {
+  transform: translateX(16px);
+}
+
+.dangerButton {
+  background-color: #f04747;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 3px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.dangerButton:hover {
+  background-color: #d84040;
+}
+
+select {
+  background-color: var(--darker-bg-color);
+  color: var(--dark-color);
+  border: none;
+  padding: 8px 12px;
+  border-radius: 3px;
+  font-size: 14px;
+}
+
+/* New styles for theme section */
+.themeSection {
+  margin-bottom: 24px;
+}
+
+.themeDescription {
+  color: #b9bbbe;
+  font-size: 14px;
+  margin-top: 4px;
+  margin-bottom: 16px;
+}

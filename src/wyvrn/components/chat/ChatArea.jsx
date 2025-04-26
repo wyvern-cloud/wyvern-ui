@@ -1,0 +1,91 @@
+import m from "mithril";
+import styles from "../../server-list.module.css";
+import { eventBus } from "../../utils/eventBus";
+import { MessageServiceFactory, MessageServiceType } from "../../services/messageServiceFactory";
+import { exampleService } from "../../services/exampleService";
+import { agentService } from "../../services/agentService";
+import MessageGroup from "./MessageGroup";
+
+const ChatArea = {
+  oninit: (vnode) => {
+    vnode.state.messages = [];
+    vnode.state.service = MessageServiceFactory.getService();
+    
+    // Initial load of messages
+    vnode.state.loadMessages = () => {
+      vnode.state.messages = vnode.state.service.getMessages();
+      m.redraw();
+    };
+    
+    // Load initial messages
+    vnode.state.loadMessages();
+    
+    // Listen for message service changes
+    vnode.state.serviceListener = (e) => {
+      vnode.state.service = e.detail.service;
+      vnode.state.loadMessages();
+    };
+    
+    window.addEventListener('message-service-changed', vnode.state.serviceListener);
+
+    // Subscribe to demo messages
+    eventBus.on("message:demo", (message) => {
+      // Only add if using example service
+      if (MessageServiceFactory.getCurrentType() === MessageServiceType.EXAMPLE) {
+        vnode.state.messages.push(message);
+        m.redraw();
+      }
+    });
+    
+    // Subscribe to agent messages
+    eventBus.on("messageReceived", async (message) => {
+      // Only add if using agent service
+      if (MessageServiceFactory.getCurrentType() === MessageServiceType.AGENT) {
+        try {
+          const processedMessage = await agentService.processMessage(message);
+          vnode.state.messages.push(processedMessage);
+          m.redraw();
+        } catch (error) {
+          console.error("Error processing message:", error);
+        }
+      }
+    });
+  },
+  
+  onremove: (vnode) => {
+    window.removeEventListener('message-service-changed', vnode.state.serviceListener);
+  },
+  
+  view: (vnode) => {
+    let messageGroups = [];
+    let lastUser = undefined;
+    
+    for (const message of vnode.state.messages) {
+      let lastGroup = messageGroups.length && messageGroups[messageGroups.length - 1];
+      if (message.username != lastUser || 
+          (lastGroup && lastGroup[0].timestamp < (message.timestamp - 1000 * 60 * 1))) {
+        messageGroups.push([]);
+        lastUser = message.username;
+      }
+      messageGroups[messageGroups.length-1].push(message);
+    }
+    
+    return (
+      <div class={`${styles.blue} ${styles.chatArea}`} style="padding: 0.3rem">
+        {messageGroups.map((item, index) => {
+          let user = vnode.state.service.getUser(item[0].username) || { 
+            username: item[0].username,
+            displayname: item[0].displayname,
+            pfp: `https://api.dicebear.com/7.x/personas/svg?seed=${item[0].username}`
+          };
+          
+          return (
+            <MessageGroup key={user.username} user={user} messages={item} />
+          );
+        })}
+      </div>
+    );
+  }
+};
+
+export default ChatArea;

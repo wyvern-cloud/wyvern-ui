@@ -9,7 +9,7 @@ import DOMPurify from 'dompurify'
 import Editor from '@/components/editor'
 
 function MessageElem({ message }) {
-	console.log(message)
+	//console.log(message)
 	let sender = message.raw?.body?.author ?? message.sender
 	return (
 		<div className="inline-block chat-message" style={{textIndent: "-1em", paddingLeft: "1em"}}>
@@ -23,7 +23,7 @@ function MessageElem({ message }) {
 }
 
 function RichMessageElem({ message }) {
-	console.log(message)
+	//console.log(message)
 	let sender = message.raw?.body?.author ?? message.sender
 	let time = new Date(message.raw?.body?.timestamp * 1000);
 	return (

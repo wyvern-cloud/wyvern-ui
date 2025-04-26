@@ -1,0 +1,53 @@
+.themeSelector {
+  display: flex;
+  gap: 16px;
+  margin: 8px 0;
+}
+
+.themeOption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+  width: 212px;
+}
+
+.themeOption:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.themeOption.selected {
+  background-color: rgba(114, 137, 218, 0.2);
+  border: 2px solid #7289da;
+}
+
+.themePreview {
+  width: 192px;
+  height: 108px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.themePreview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: url(#themeColorFilter);
+}
+
+.themePlaceholder {
+  width: 100%;
+  height: 100%;
+  background-color: #36393f;
+}
+
+.themeName {
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+}
