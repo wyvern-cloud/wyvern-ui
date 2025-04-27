@@ -15,6 +15,13 @@
 
 # production
 /build
+/dist
+/new
+/public/bin
+*.tgz
+*.old
+
+/.vscode
 
 # misc
 .DS_Store
