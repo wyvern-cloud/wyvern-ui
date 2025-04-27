@@ -251,6 +251,7 @@ class DIDCommWorker {
       await this.didcomm.sendMessage(to, this.did, message)
     } catch(error) {
       console.error("Failed to send message:", error);
+      console.log("Failed Message Input:", to, message);
     }
   }
 

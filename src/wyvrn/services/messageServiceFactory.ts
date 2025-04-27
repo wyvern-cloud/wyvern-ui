@@ -1,3 +1,4 @@
+import { GLOBAL_PREFIX } from "../utils/constants";
 import { exampleService, IChatMessage, IUser, IRole, IExampleService } from './exampleService';
 import { agentService } from './agentService';
 
@@ -108,13 +109,15 @@ export enum MessageServiceType {
 // Factory that creates the appropriate service adapter
 export class MessageServiceFactory {
   private static adapter: IMessageServiceAdapter;
-  private static currentType: MessageServiceType = MessageServiceType.EXAMPLE;
-  
+  private static currentType: MessageServiceType = 
+    (localStorage.getItem(`${GLOBAL_PREFIX}message-service`) as MessageServiceType) || MessageServiceType.EXAMPLE;
+
   static getService(type?: MessageServiceType): IMessageServiceAdapter {
     // If type is specified, create a new adapter of that type
     if (type && (!this.adapter || type !== this.currentType)) {
       this.currentType = type;
-      
+      localStorage.setItem(`${GLOBAL_PREFIX}message-service`, type); // Save to localStorage
+
       switch (type) {
         case MessageServiceType.EXAMPLE:
           this.adapter = new ExampleServiceAdapter();
@@ -125,7 +128,7 @@ export class MessageServiceFactory {
         default:
           throw new Error(`Unknown message service type: ${type}`);
       }
-      
+
       // Dispatch custom event to notify components
       const event = new CustomEvent('message-service-changed', { 
         detail: { 
@@ -135,16 +138,16 @@ export class MessageServiceFactory {
       });
       window.dispatchEvent(event);
     }
-    
+
     // If no type specified and no adapter exists, create default
     if (!this.adapter) {
       this.currentType = MessageServiceType.EXAMPLE;
       this.adapter = new ExampleServiceAdapter();
     }
-    
+
     return this.adapter;
   }
-  
+
   static getCurrentType(): MessageServiceType {
     return this.currentType;
   }

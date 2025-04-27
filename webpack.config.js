@@ -1,6 +1,7 @@
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   entry: './src/index.ts',
@@ -57,6 +58,23 @@ module.exports = {
   },
 	devtool: 'inline-source-map',
   plugins: [
+    new CopyPlugin({
+      patterns: [
+        {
+          from: 'public',
+          to: '',
+          filter: (resourcePath) => {
+            // Exclude the index.html file from being copied
+            return !resourcePath.endsWith('index.html');
+          },
+        },
+        // { from: 'src/wyvrn/assets', to: 'assets' },
+        // { from: 'src/wyvrn/manifest.json', to: 'manifest.json' },
+        // { from: 'src/wyvrn/background.js', to: 'background.js' },
+        // { from: 'src/wyvrn/content.js', to: 'content.js' },
+        // { from: 'src/wyvrn/popup.js', to: 'popup.js' }
+      ],
+    }),
     new MiniCssExtractPlugin({
       filename: '[name].css',
       chunkFilename: '[id].css',
@@ -66,7 +84,7 @@ module.exports = {
 			//title:'My webpage!',
 			filename: 'index.html',
 			template: 'public/index.html'
-		})
+		}),
   ],
   resolve: {
     extensions: ['.ts', '.js', '.jsx', '.tsx'],

@@ -1,8 +1,9 @@
-
 import { v4 as uuidv4 } from 'uuid';
 import { eventBus } from './utils/eventBus';
 import logger from "./worker/logger"
 import { ConnectionService, ConnectionType, ConnectionStatus } from "./connections";
+import { WebRTCManager } from './webrtcManager';
+import { GLOBAL_PREFIX } from './utils/constants';
 
 /*
  * RELAY_DID = 'did:web:dev.cloudmediator.indiciotech.io'
@@ -16,16 +17,19 @@ const IMPLEMENTED_PROTOCOLS = [
   "https://didcomm.org/basicmessage/2.0",
   "https://didcomm.org/user-profile/1.0",
   "https://developer.wyvrn.app/protocols/groupmessage/1.0",
+  "https://didcomm.org/webrtc-negotiation/1.0",
 ]
-
 
 export class WyvrnAgent {
 	private my_did: string;
 	private worker: Worker;
 	private connectionService: ConnectionService;
 	private peers = {};
+  private webrtcManager: WebRTCManager;
+
 	constructor() {
 		this.connectionService = new ConnectionService();
+    this.webrtcManager = new WebRTCManager(this.handleSignalingMessage.bind(this));
 	}
 	public initWorker() {
 		this.worker = new Worker(
@@ -118,41 +122,69 @@ export class WyvrnAgent {
     })
 	}
 
+  public startVoiceCall(did: string) {
+    const message = {
+      id: uuidv4(),
+      type: 'https://didcomm.org/webrtc-negotiation/1.0/request',
+      body: {
+        capabilities: {
+          audio: true,
+          video: false,
+          screen_share: false,
+          data_channel: false,
+        },
+        connection_id: uuidv4(),
+        description: 'Voice call request',
+      },
+    };
+    this.sendMessage(did, message);
+  }
+
+  public endVoiceCall(did: string, connectionId: string) {
+    const message = {
+      id: uuidv4(),
+      type: 'https://didcomm.org/webrtc-negotiation/1.0/terminate',
+      body: {
+        reason: 'Call ended by user',
+        connection_id: connectionId,
+      },
+    };
+    this.sendMessage(did, message);
+  }
 
 	private postMessage<T>(message: WorkerCommand<T>) {
     console.log("Agent->DIDCommWorker: ", message)
     this.worker.postMessage(message)
   }
 	private checkExistingSecrets(): boolean {
-    const did = localStorage.getItem("wyvrn-did");
-    const mediatedDid = localStorage.getItem("wyvrn-relayed-did");
-    const secrets = localStorage.getItem("wyvrn-secrets");
-    if(!did)
-      return false;
+    const did = localStorage.getItem(`${GLOBAL_PREFIX}did`);
+    const mediatedDid = localStorage.getItem(`${GLOBAL_PREFIX}relayed-did`);
+    const secrets = localStorage.getItem(`${GLOBAL_PREFIX}secrets`);
+    if (!did) return false;
     this.postMessage({
       type: "establishSecrets",
       payload: {
         did: did,
         mediatedDid: mediatedDid,
         savedSecrets: JSON.parse(secrets),
-      }
+      },
     });
-    this.onDidGenerated(mediatedDid)
+    this.onDidGenerated(mediatedDid);
     return true;
   }
 
   private setSecretsFromLocalStorage({did, mediatedDid, secrets}): void {
-    localStorage.setItem("wyvrn-did", did)
-    localStorage.setItem("wyvrn-relayed-did", mediatedDid)
-    localStorage.setItem("wyvrn-secrets", JSON.stringify(Object.values(secrets)))
+    localStorage.setItem(`${GLOBAL_PREFIX}did`, did);
+    localStorage.setItem(`${GLOBAL_PREFIX}relayed-did`, mediatedDid);
+    localStorage.setItem(`${GLOBAL_PREFIX}secrets`, JSON.stringify(Object.values(secrets)));
   }
 
   public DEVELOPER_clearDataBase() {
-    const request = indexedDB.deleteDatabase("MyTestDatabase");
-    localStorage.removeItem("wyvrn-did");
-    localStorage.removeItem("wyvrn-relayed-did");
-    localStorage.removeItem("wyvrn-secrets");
-    localStorage.removeItem("profile");
+    const request = indexedDB.deleteDatabase(`${GLOBAL_PREFIX}MyTestDatabase`);
+    localStorage.removeItem(`${GLOBAL_PREFIX}did`);
+    localStorage.removeItem(`${GLOBAL_PREFIX}relayed-did`);
+    localStorage.removeItem(`${GLOBAL_PREFIX}secrets`);
+    localStorage.removeItem(`${GLOBAL_PREFIX}profile`);
   }
 
 	private handleDiscoverFeatures(message: IMessage) {
@@ -250,11 +282,11 @@ export class WyvrnAgent {
 			case "https://didcomm.org/user-profile/1.0/profile":
 				let pfp;
 				let pfp_name = msg.body?.profile?.displayPicture;
-				if (pfp_name && pfp_name.starts_with('#')) {
+				if (pfp_name && pfp_name.startsWith('#')) {
 					let img_mime, img_data;
-					let pfp_name = pfp_name.slice(1)
+					let pfp_name_2 = pfp_name.slice(1)
 					for (const attachment of msg.attachments) {
-						if (attachment.id === pfp_name) {
+						if (attachment.id === pfp_name_2) {
 							img_mime = attachment.media_type;
 							img_data = attachment.data?.base64;
 						}
@@ -279,14 +311,14 @@ export class WyvrnAgent {
     // request.onsuccess = (event) => {
     //   // event.target.result === customer.ssn;
     // };
-				this.connectionService.addConnection({
-					did: msg.from,
-					connectionType: ConnectionType.Peer,
-					status: ConnectionStatus.Pending,
-					displayName: msg.body?.profile?.displayName,
-					icon: pfp,
-					description: msg.body?.profile?.description,
-				});
+				// this.connectionService.addConnection({
+				// 	did: msg.from,
+				// 	connectionType: ConnectionType.Peer,
+				// 	status: ConnectionStatus.Pending,
+				// 	displayName: msg.body?.profile?.displayName,
+				// 	icon: pfp,
+				// 	description: msg.body?.profile?.description,
+				// });
 				/*
 				ContactService.addContact(frm);
 				const transaction = this.db.transaction(["contacts"], "readwrite");
@@ -301,14 +333,107 @@ export class WyvrnAgent {
 				// */
 
 				break
+      case 'https://didcomm.org/webrtc-negotiation/1.0/offer':
+        this.webrtcManager.handleOffer(msg, { type: 'offer', sdp: msg.body.sdp }, msg.from, msg.body.connection_id);
+        break;
+      case 'https://didcomm.org/webrtc-negotiation/1.0/answer':
+        this.webrtcManager.handleAnswer(msg, { type: 'answer', sdp: msg.body.sdp });
+        break;
+      case 'https://didcomm.org/webrtc-negotiation/1.0/candidate':
+        this.webrtcManager.handleCandidate(msg, msg.body.candidate);
+        break;
+      case 'https://didcomm.org/webrtc-negotiation/1.0/terminate':
+        this.webrtcManager.endCall();
+        break;
+      case 'https://didcomm.org/webrtc-negotiation/1.0/request':
+        const { capabilities, connection_id } = msg.body;
+        if (capabilities.audio) {
+          this.webrtcManager.startCall(msg.from).then((connectionId) => {
+            if (false && connectionId) {
+              const localDescription = this.webrtcManager.getPeerConnection().localDescription;
+              if (localDescription) {
+                this.sendMessage(msg.from, {
+                  id: uuidv4(),
+                  type: 'https://didcomm.org/webrtc-negotiation/1.0/offer',
+                  thid: msg.id,
+                  body: {
+                    sdp: localDescription.sdp,
+                    connection_id: connectionId,
+                  },
+                });
+              }
+            }
+          });
+        } else {
+          this.sendMessage(msg.from, {
+            id: uuidv4(),
+            type: 'https://didcomm.org/webrtc-negotiation/1.0/decline',
+            thid: msg.id,
+            body: {
+              reason: 'Audio capability not supported',
+              connection_id,
+            },
+          });
+        }
+        break;
 		}
 	}
+
+  private handleSignalingMessage(message: any) {
+    const { type, payload } = message;
+
+    switch (type) {
+      case 'offer':
+        this.sendMessage(message.to, {
+          id: uuidv4(),
+          type: 'https://didcomm.org/webrtc-negotiation/1.0/offer',
+          body: {
+            sdp: message.sdp,
+            connection_id: message.connectionId,
+          },
+        });
+        break;
+      case 'answer':
+        this.sendMessage(message.to, {
+          id: uuidv4(),
+          type: 'https://didcomm.org/webrtc-negotiation/1.0/answer',
+          body: {
+            sdp: message.sdp,
+            connection_id: message.connectionId,
+          },
+        });
+        break;
+      case 'candidate':
+        this.sendMessage(message.to, {
+          id: uuidv4(),
+          type: 'https://didcomm.org/webrtc-negotiation/1.0/candidate',
+          body: {
+            candidate: message.candidate,
+            mid: message.mid,
+            connection_id: message.connectionId,
+          },
+        });
+        break;
+      case 'terminate':
+        this.sendMessage(message.to, {
+          id: uuidv4(),
+          type: 'https://didcomm.org/webrtc-negotiation/1.0/terminate',
+          body: {
+            reason: message.reason,
+            connection_id: message.connectionId,
+          },
+        });
+        break;
+      default:
+        console.warn('Unknown signaling message type:', type);
+    }
+  }
 
 	private handleMessage(type, payload) {
 		let eventName;
 		switch (type) {
 			case 'init':
-				const request = indexedDB.open("MyTestDatabase", 1);
+				const request = indexedDB.open(`${GLOBAL_PREFIX}MyTestDatabase`, 1);
         request.onerror = (event) => {
           console.error("Why didn't you allow my web app to use IndexedDB?!");
           console.error(`Database error: ${event.target.errorCode}`);
@@ -321,10 +446,9 @@ export class WyvrnAgent {
             });
             this.db.transaction("messages").objectStore("messages").getAll().onsuccess = (event) => {
               event.target.result.forEach(message => {
-                let did = message.contact_did
+                let did = message.contact_did;
                 ContactService.saveMessageHistory(did, message.messages);
               });
-              //eventbus.emit("contactsImported", {})
             };
           };
         };
@@ -334,8 +458,7 @@ export class WyvrnAgent {
           this.messageStore = db.createObjectStore("messages", { keyPath: "contact_did" });
         };
 
-        if(this.checkExistingSecrets())
-          break;
+        if (this.checkExistingSecrets()) break;
 				this.worker.postMessage({
 					type: 'establishMediation',
 					payload: { mediatorDid: DEFAULT_MEDIATOR },

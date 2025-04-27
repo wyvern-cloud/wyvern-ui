@@ -1,5 +1,7 @@
 import { preloadedThemes, Theme, ThemeMode } from '../themes';
 
+import { GLOBAL_PREFIX } from '../utils/constants';
+
 class ThemeService {
   private static instance: ThemeService;
   private currentTheme: ThemeMode = ThemeMode.DARK;
@@ -9,7 +11,7 @@ class ThemeService {
 
   private constructor() {
     // Initialize with stored theme or default to system
-    const savedTheme = localStorage.getItem('wyvrn-theme') as ThemeMode;
+    const savedTheme = localStorage.getItem(`${GLOBAL_PREFIX}theme`) as ThemeMode;
     this.currentTheme = savedTheme || ThemeMode.SYSTEM;
     
     // Set up system theme detection
@@ -46,7 +48,7 @@ class ThemeService {
   public async setTheme(themeId: ThemeMode): Promise<void> {
     if (this.currentTheme !== themeId) {
       this.currentTheme = themeId;
-      localStorage.setItem('wyvrn-theme', themeId);
+      localStorage.setItem(`${GLOBAL_PREFIX}theme`, themeId);
       await this.applyTheme(themeId);
       
       // Notify listeners

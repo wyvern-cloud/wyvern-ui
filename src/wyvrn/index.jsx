@@ -22,7 +22,8 @@ themeService; // Initialize theme service
 var page = () => {
   let serverView = 'dms';
   return {
-    view: function() {
+    view: function(vnode) {
+      const did = m.route.param('did');
       if (m.route.get() === '/w/requests')
         serverView = 'server';
       else
@@ -30,7 +31,7 @@ var page = () => {
       return (
         <div class={styles.appLayout}>
           <Sidebar />
-          <ChatContainer />
+          <ChatContainer did={did} />
           <UserListPanel />
         </div>
       )
