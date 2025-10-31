@@ -16,7 +16,7 @@ import FriendsList from './components/friends/FriendsList';
 import SettingsPanel from './components/settings/SettingsPanel';
 
 // Initialize services
-w.initWorker();
+w.init();
 themeService; // Initialize theme service
 
 var page = () => {

@@ -4,6 +4,7 @@ import logger from "./worker/logger"
 import { ConnectionService, ConnectionType, ConnectionStatus } from "./connections";
 import { WebRTCManager } from './webrtcManager';
 import { GLOBAL_PREFIX } from './utils/constants';
+import { Router, loadProtocols } from './protocols/router';
 
 /*
  * RELAY_DID = 'did:web:dev.cloudmediator.indiciotech.io'
@@ -26,9 +27,11 @@ export class WyvrnAgent {
 	private connectionService: ConnectionService;
 	private peers = {};
   private webrtcManager: WebRTCManager;
+  private db: IDBDatabase | null = null;
 
 	constructor() {
 		this.connectionService = new ConnectionService();
+    this.router = new Router(this);
     this.webrtcManager = new WebRTCManager(this.handleSignalingMessage.bind(this));
 
     // Handle remote call termination
@@ -37,7 +40,17 @@ export class WyvrnAgent {
         console.log(`Call with DID ${did} and connection ID ${connectionId} has ended.`);
       }
     };
+
+    // Load saved peers from the database
+    this.loadPeersFromDatabase();
+    this.initDatabase();
 	}
+
+  public async init() {
+    await loadProtocols(this.router);
+    this.initWorker();
+  }
+
 	public initWorker() {
 		this.worker = new Worker(
 			/* webpackChunkName: "didcomm-worker" */ new URL(
@@ -122,6 +135,12 @@ export class WyvrnAgent {
     // };
   
   }
+	public fetchMessages() {
+    this.postMessage({
+      type: "pickupStatus",
+				payload: { mediatorDid: DEFAULT_MEDIATOR },
+    })
+	}
 	public sendMessage(did, message) {
     this.postMessage({
       type: "sendMessage",
@@ -269,16 +288,22 @@ export class WyvrnAgent {
     })
 	}
 
-	private handleCoreProtocolMessage(msg) {
+	private async handleCoreProtocolMessage(msg) {
+    try {
+      await this.router.route(msg.type, msg);
+      return;
+    } catch (e) {
+      console.error("Error handling protocol message:", e);
+    }
 		switch(msg.type) {
-			case "https://didcomm.org/trust-ping/2.0/ping":
-        if (msg.body?.response_requested !== false) {
-          this.sendMessage(msg.from, {
-            type: "https://didcomm.org/trust-ping/2.0/ping-response",
-            thid: msg.id,
-          })
-        }
-        break
+			// case "https://didcomm.org/trust-ping/2.0/ping":
+      //   if (msg.body?.response_requested !== false) {
+      //     this.sendMessage(msg.from, {
+      //       type: "https://didcomm.org/trust-ping/2.0/ping-response",
+      //       thid: msg.id,
+      //     })
+      //   }
+      //   break
       case "https://didcomm.org/discover-features/2.0/queries":
         const discloseMessage = this.handleDiscoverFeatures(msg)
         this.sendMessage(msg.from, discloseMessage)
@@ -287,30 +312,17 @@ export class WyvrnAgent {
 				// body > query > [displayName, pic, etc], if not specified, send whole profile
 				break
 			case "https://didcomm.org/user-profile/1.0/profile":
-				let pfp;
-				let pfp_name = msg.body?.profile?.displayPicture;
-				if (pfp_name && pfp_name.startsWith('#')) {
-					let img_mime, img_data;
-					let pfp_name_2 = pfp_name.slice(1)
-					for (const attachment of msg.attachments) {
-						if (attachment.id === pfp_name_2) {
-							img_mime = attachment.media_type;
-							img_data = attachment.data?.base64;
-						}
-					}
-					if (img_data)
-						pfp = `data:${img_mime};base64,${img_data}`
-				}
-				else
-					pfp = pfp_name;
-				this.peers[msg.from] = {
-					did: msg.from,
-					username: msg.body?.profile?.displayName,
-					displayname: msg.body?.profile?.displayName,
-					description: msg.body?.profile?.description,
-					pfp,
-				}
-				console.log("NEW PEER", this.peers)
+				const peer = {
+          did: msg.from,
+          username: msg.body?.profile?.displayName,
+          displayname: msg.body?.profile?.displayName,
+          description: msg.body?.profile?.description,
+          pfp: msg.body?.profile?.displayPicture,
+        };
+
+        this.peers[msg.from] = peer;
+        this.savePeerToDatabase(peer); // Save peer to the database
+        console.log("NEW PEER", this.peers)
     // ContactService.addMessage(contact.did, internalMessage)
     // const transaction = this.db.transaction(["messages"], "readwrite");
     // const objectStore = transaction.objectStore("messages")
@@ -318,14 +330,14 @@ export class WyvrnAgent {
     // request.onsuccess = (event) => {
     //   // event.target.result === customer.ssn;
     // };
-				// this.connectionService.addConnection({
-				// 	did: msg.from,
-				// 	connectionType: ConnectionType.Peer,
-				// 	status: ConnectionStatus.Pending,
-				// 	displayName: msg.body?.profile?.displayName,
-				// 	icon: pfp,
-				// 	description: msg.body?.profile?.description,
-				// });
+				this.connectionService.addConnection({
+					did: msg.from,
+					connectionType: ConnectionType.Peer,
+					status: ConnectionStatus.Pending,
+					displayName: msg.body?.profile?.displayName,
+					icon: pfp,
+					description: msg.body?.profile?.description,
+				});
 				/*
 				ContactService.addContact(frm);
 				const transaction = this.db.transaction(["contacts"], "readwrite");
@@ -531,6 +543,75 @@ export class WyvrnAgent {
 			},
 		};
 	}
+
+  private async initDatabase() {
+    return new Promise<void>((resolve, reject) => {
+      const request = indexedDB.open('WyvernAgentDB', 1);
+
+      request.onupgradeneeded = (event) => {
+        const db = (event.target as IDBOpenDBRequest).result;
+
+        // Create 'users' object store if it doesn't exist
+        if (!db.objectStoreNames.contains('users')) {
+          db.createObjectStore('users', { keyPath: 'did' });
+        }
+      };
+
+      request.onsuccess = (event) => {
+        this.db = (event.target as IDBOpenDBRequest).result;
+        resolve();
+      };
+
+      request.onerror = () => {
+        reject(new Error('Failed to initialize IndexedDB'));
+      };
+    });
+  }
+
+  private async loadPeersFromDatabase(): Promise<void> {
+    if (!this.db) await this.initDatabase();
+
+    return new Promise<void>((resolve, reject) => {
+      const transaction = this.db!.transaction(['users'], 'readonly');
+      const store = transaction.objectStore('users');
+      const request = store.getAll();
+
+      request.onsuccess = () => {
+        const users = request.result;
+        this.peers = users.reduce((acc, user) => {
+          acc[user.did] = user;
+          return acc;
+        }, {});
+        console.log('Loaded peers from database:', this.peers);
+        resolve();
+      };
+
+      request.onerror = () => {
+        console.error('Failed to load peers from database');
+        reject(new Error('Failed to load peers from database'));
+      };
+    });
+  }
+
+  private async savePeerToDatabase(peer: { did: string; username: string; displayname: string; description?: string; pfp?: string }): Promise<void> {
+    if (!this.db) await this.initDatabase();
+
+    return new Promise<void>((resolve, reject) => {
+      const transaction = this.db!.transaction(['users'], 'readwrite');
+      const store = transaction.objectStore('users');
+      const request = store.put(peer);
+
+      request.onsuccess = () => {
+        console.log('Saved peer to database:', peer);
+        resolve();
+      };
+
+      request.onerror = () => {
+        console.error('Failed to save peer to database:', peer);
+        reject(new Error('Failed to save peer to database'));
+      };
+    });
+  }
 }
 
 export default (() => {console.log("creating agent"); return new WyvrnAgent();})();
