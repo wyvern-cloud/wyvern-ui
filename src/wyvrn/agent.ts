@@ -30,6 +30,13 @@ export class WyvrnAgent {
 	constructor() {
 		this.connectionService = new ConnectionService();
     this.webrtcManager = new WebRTCManager(this.handleSignalingMessage.bind(this));
+
+    // Handle remote call termination
+    this.webrtcManager.onCallStateChange = ({ did, connectionId, active }) => {
+      if (!active) {
+        console.log(`Call with DID ${did} and connection ID ${connectionId} has ended.`);
+      }
+    };
 	}
 	public initWorker() {
 		this.worker = new Worker(

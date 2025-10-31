@@ -7,6 +7,7 @@ export class WebRTCManager {
   private signalingChannel: (message: any) => void;
   private activeCall: { did: string; connectionId: string } | null = null;
   private audioElement: HTMLAudioElement | null = null;
+  public onCallStateChange: (state: { did: string; connectionId: string; active: boolean }) => void = () => {};
 
   constructor(signalingChannel: (message: any) => void) {
     this.signalingChannel = signalingChannel;
@@ -85,6 +86,7 @@ export class WebRTCManager {
       to: did,
     });
 
+    this.onCallStateChange({ did, connectionId, active: true }); // Notify call state change
     return connectionId;
   }
 
@@ -150,6 +152,8 @@ export class WebRTCManager {
       return;
     }
 
+    const { did, connectionId } = this.activeCall;
+
     // Stop the audio playback and clean up the audio element
     if (this.audioElement) {
       this.audioElement.pause();
@@ -160,5 +164,7 @@ export class WebRTCManager {
     this.peerConnection.close();
     this.localStream.getTracks().forEach((track) => track.stop());
     this.activeCall = null;
+
+    this.onCallStateChange({ did, connectionId, active: false }); // Notify call state change
   }
 }
