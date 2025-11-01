@@ -10,7 +10,7 @@ const FriendsList = () => {
   return {
     oninit: async () => {
       let did = await w.waitForStartup();
-      console.log("oninit", did);
+      console.debug("[FriendsList] oninit", did);
       my_did = did;
 
       // Load peers from the agent

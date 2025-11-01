@@ -433,7 +433,7 @@ export class EphemeralSecretsResolver implements SecretsManager {
   // Helper method to store a secret in memory
   store_secret(secret: Secret): void {
     try {
-			console.log("store_secret", secret);
+			console.debug("store_secret", secret);
       this.secrets[secret.id] = secret
     } catch (error) {
       throw EphemeralSecretsResolver.createError(
@@ -591,7 +591,7 @@ export class DIDComm {
         const text = await response.text()
         throw new Error(`Error sending message: ${text}`)
       }
-      logger.log("Message sent successfully.")
+      logger.debug("Message sent successfully.")
 
       const packedResponse = await response.text()
       const unpacked = await this.unpackMessage(packedResponse)
@@ -628,8 +628,8 @@ export class DIDComm {
         throw new Error(`Error sending message: ${text}`)
       }
       const text = await response.text()
-      console.log("Response:", text)
-      logger.log("Message sent successfully.")
+      console.debug("Response:", text)
+      logger.debug("Message sent successfully.")
     } catch (error) {
       console.error(error)
     }

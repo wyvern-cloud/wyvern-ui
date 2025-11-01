@@ -65,7 +65,7 @@ export class WyvrnAgent {
 		this.worker.onmessage = function(event) {
 			const { type, payload } = event.data;
 
-			console.log("WYVRN-DEBUG", event.data);
+			console.debug("WYVRN-DEBUG", event.data);
 			me.handleMessage(type, payload);
 		};
 	}
@@ -490,7 +490,7 @@ export class WyvrnAgent {
 				break;
 			case 'messageReceived':
 				// Determine the event name based on message type
-				console.log("AGENT-DBG", type, payload);
+				console.debug("AGENT-DBG", type, payload);
 				this.handleCoreProtocolMessage(payload);
 				if (type === 'p2p') {
 					eventName = `message:p2p:${message.to}`; // Unique per peer
@@ -514,14 +514,14 @@ export class WyvrnAgent {
 				});
 				break;
 			case 'log':
-				console.log(payload.message, payload.data);
+				console.debug("[AGENT-LOG]", payload.message, payload.data);
 				break;
 			default:
-				console.log("UNKNOWN MESSAGE FROM WORKER", type, payload);
+				console.warn("UNKNOWN MESSAGE FROM WORKER", type, payload);
 		}
 	}
 	private onDidGenerated(did: string) {
-    logger.log("DID Generated:", did)
+    logger.debug("[AGENT] DID Generated:", did)
     //eventbus.emit("didGenerated", did)
 
 		this.my_did = did;
@@ -587,7 +587,7 @@ export class WyvrnAgent {
           acc[user.did] = user;
           return acc;
         }, {});
-        console.log('Loaded peers from database:', this.peers);
+        console.debug('[AGENT] Loaded peers from database:', this.peers);
         resolve();
       };
 
@@ -619,4 +619,4 @@ export class WyvrnAgent {
   }
 }
 
-export default (() => {console.log("creating agent"); return new WyvrnAgent();})();
+export default (() => {console.debug("Creating DIDComm Agent"); return new WyvrnAgent();})();

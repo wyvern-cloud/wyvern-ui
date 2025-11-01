@@ -19,7 +19,7 @@ class DIDCommWorker {
     logger.subscribe(LogTopic.LOG, this.onLog.bind(this))
     this.didcomm = new DIDComm()
     this.postMessage({ type: "init", payload: {} })
-    logger.log("Worker initialized.")
+    logger.log("DIDComm Worker initialized.")
   }
 
   async getDidSecrets() {
@@ -134,7 +134,7 @@ class DIDCommWorker {
       await this.handlePackedMessage(await event.data.text())
     }
     this.ws.onopen = async event => {
-      console.log("ws onopen", event)
+      console.debug("[DIDCommWorker] ws onopen", event)
       const message = {
         type: "https://didcomm.org/messagepickup/3.0/live-delivery-change",
         body: {
@@ -155,11 +155,11 @@ class DIDCommWorker {
       this.postMessage({ type: "connected", payload: {} })
     }
     this.ws.onerror = event => {
-      console.log("ws onerror", event)
+      console.debug("[DIDCommWorker] ws onerror", event)
       this.postMessage({ type: "error", payload: {} })
     }
     this.ws.onclose = event => {
-      console.log("ws onclose", event)
+      console.debug("[DIDCommWorker] ws onclose", event)
       this.postMessage({ type: "disconnected", payload: {} })
     }
   }
@@ -176,7 +176,7 @@ class DIDCommWorker {
   }
 
   async handleMessage(message: IMessage) {
-    console.log("handleMessage: ", message)
+    console.debug("[DIDCommWorker] handleMessage: ", message)
     switch (message.type) {
       case "https://didcomm.org/messagepickup/3.0/status":
         if (message.body.message_count > 0) {
@@ -261,7 +261,7 @@ class DIDCommWorker {
 
   async route(event: MessageEvent<WorkerCommand<any>>) {
     const { type, payload } = event.data
-    console.log("Worker received message: ", type)
+    console.debug("Worker received message: ", type)
     const method = this[type]
 
     if (typeof method === "function") {
@@ -277,7 +277,7 @@ class DIDCommWorker {
 }
 
 const handler = new DIDCommWorker()
-console.log("Created worker: ", handler)
+console.log("[WEBWORKER] Created webworker: ", handler)
 ctx.onmessage = async (event: MessageEvent) => {
   await handler.route(event)
 }

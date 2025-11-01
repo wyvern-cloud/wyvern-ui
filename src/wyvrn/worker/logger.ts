@@ -21,6 +21,17 @@ export interface MessageRecord {
 export class LoggerService {
   private records: Record[] = []
 
+  debug(...messages: string[]) {
+    console.debug(...messages)
+    const record = {
+      message: messages.join(" "),
+      timestamp: new Date(),
+      topic: LogTopic.LOG,
+    }
+    this.records.push(record)
+    EventBus.emit(LogTopic.LOG, record)
+  }
+
   log(...messages: string[]) {
     console.log(...messages)
     const record = {
