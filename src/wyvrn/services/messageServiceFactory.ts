@@ -141,8 +141,8 @@ export class MessageServiceFactory {
 
     // If no type specified and no adapter exists, create default
     if (!this.adapter) {
-      this.currentType = MessageServiceType.EXAMPLE;
-      this.adapter = new ExampleServiceAdapter();
+      this.currentType = MessageServiceType.AGENT;
+      this.adapter = new AgentServiceAdapter();
     }
 
     return this.adapter;
