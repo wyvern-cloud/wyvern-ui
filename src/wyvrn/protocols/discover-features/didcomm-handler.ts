@@ -16,6 +16,9 @@ class DiscoverFeaturesHandler implements ProtocolHandler {
 
                 // Loop through all queries, then all implemented protocols and build up a
                 // list of supported protocols that match the user's request
+                console.debug("[Discover Features] Queries:", message.body.queries);
+                console.debug("[Discover Features] Supported Protocols:", PROTOCOLS);
+                console.debug("[Discover Features] Regex Patterns:", message.body.queries.map(query => createRegex(query["match"])));
                 for (let query of message.body.queries) {
                     // Rudimentary implementation, ignoring all except protocol requests
                     if (query["feature-type"] != "protocol") continue
