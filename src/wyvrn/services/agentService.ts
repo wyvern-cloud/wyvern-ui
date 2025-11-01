@@ -63,7 +63,7 @@ export class AgentService {
         // Users store
         if (!db.objectStoreNames.contains('users')) {
           const usersStore = db.createObjectStore('users', { 
-            keyPath: 'username', 
+            keyPath: 'did', 
             autoIncrement: false 
           });
           usersStore.createIndex('displayname', 'displayname', { unique: false });

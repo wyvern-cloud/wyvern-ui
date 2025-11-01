@@ -40,13 +40,12 @@ export class WyvrnAgent {
         console.log(`Call with DID ${did} and connection ID ${connectionId} has ended.`);
       }
     };
-
-    // Load saved peers from the database
-    this.loadPeersFromDatabase();
-    this.initDatabase();
 	}
 
   public async init() {
+    // Load saved peers from the database
+    this.loadPeersFromDatabase();
+    this.initDatabase();
     await loadProtocols(this.router);
     this.initWorker();
   }
