@@ -3,7 +3,7 @@ import { eventBus } from './utils/eventBus';
 import logger from "./worker/logger"
 import { ConnectionService, ConnectionType, ConnectionStatus } from "./connections";
 import { WebRTCManager } from './webrtcManager';
-import { GLOBAL_PREFIX } from './utils/constants';
+import { GLOBAL_PREFIX, GLOBAL_DATABASE_NAME } from './utils/constants';
 import { Router, loadProtocols } from './protocols/router';
 
 /*
@@ -206,7 +206,7 @@ export class WyvrnAgent {
   }
 
   public DEVELOPER_clearDataBase() {
-    const request = indexedDB.deleteDatabase(`${GLOBAL_PREFIX}MyTestDatabase`);
+    const request = indexedDB.deleteDatabase(`${GLOBAL_PREFIX}${GLOBAL_DATABASE_NAME}`);
     localStorage.removeItem(`${GLOBAL_PREFIX}did`);
     localStorage.removeItem(`${GLOBAL_PREFIX}relayed-did`);
     localStorage.removeItem(`${GLOBAL_PREFIX}secrets`);
@@ -334,9 +334,9 @@ export class WyvrnAgent {
 					did: msg.from,
 					connectionType: ConnectionType.Peer,
 					status: ConnectionStatus.Pending,
-					displayName: msg.body?.profile?.displayName,
-					icon: pfp,
-					description: msg.body?.profile?.description,
+					displayName: peer.displayname,
+					icon: peer.pfp,
+					description: peer.description,
 				});
 				/*
 				ContactService.addContact(frm);
@@ -452,24 +452,29 @@ export class WyvrnAgent {
 		let eventName;
 		switch (type) {
 			case 'init':
-				const request = indexedDB.open(`${GLOBAL_PREFIX}MyTestDatabase`, 1);
+				const request = indexedDB.open(`${GLOBAL_PREFIX}${GLOBAL_DATABASE_NAME}`, 1);
         request.onerror = (event) => {
           console.error("Why didn't you allow my web app to use IndexedDB?!");
           console.error(`Database error: ${event.target.errorCode}`);
         };
         request.onsuccess = (event) => {
           this.db = event.target.result;
-          this.db.transaction("contacts").objectStore("contacts").getAll().onsuccess = (event) => {
-            event.target.result.forEach(contact => {
-              ContactService.addContact(contact);
-            });
-            this.db.transaction("messages").objectStore("messages").getAll().onsuccess = (event) => {
-              event.target.result.forEach(message => {
-                let did = message.contact_did;
-                ContactService.saveMessageHistory(did, message.messages);
+          const store_exists = (store_name: string) => this.db.objectStoreNames.contains(store_name);
+          if (store_exists("contacts")) {
+            this.db.transaction("contacts").objectStore("contacts").getAll().onsuccess = (event) => {
+              event.target.result.forEach(contact => {
+                ContactService.addContact(contact);
               });
+              if (store_exists("messages")) {
+                this.db.transaction("messages").objectStore("messages").getAll().onsuccess = (event) => {
+                  event.target.result.forEach(message => {
+                    let did = message.contact_did;
+                    ContactService.saveMessageHistory(did, message.messages);
+                  });
+                };
+              }
             };
-          };
+          }
         };
         request.onupgradeneeded = (event) => {
           const db = event.target.result;
@@ -546,7 +551,7 @@ export class WyvrnAgent {
 
   private async initDatabase() {
     return new Promise<void>((resolve, reject) => {
-      const request = indexedDB.open('WyvernAgentDB', 1);
+      const request = indexedDB.open(`${GLOBAL_PREFIX}${GLOBAL_DATABASE_NAME}`, 1);
 
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result;

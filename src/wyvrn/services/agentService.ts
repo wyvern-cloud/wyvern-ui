@@ -1,4 +1,5 @@
 import { IChatMessage, IUser, IRole, IMessage } from './exampleService';
+import { GLOBAL_PREFIX, GLOBAL_DATABASE_NAME } from '../utils/constants';
 
 export enum MessageType {
   TEXT = 'text',
@@ -43,7 +44,7 @@ export class AgentService {
 
   private async initDatabase() {
     return new Promise<void>((resolve, reject) => {
-      const request = indexedDB.open('WyvernAgentDB', 1);
+      const request = indexedDB.open(`${GLOBAL_PREFIX}${GLOBAL_DATABASE_NAME}`, 1);
 
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result;
@@ -196,7 +197,7 @@ export class AgentService {
         await this.saveUser({
           username: data.username, 
           displayname: data.newDisplayName,
-          pfp: data.currentPfp
+          pfp: data?.currentPfp
         });
         break;
       case MessageType.FEATURE_ANNOUNCEMENT:
