@@ -25,7 +25,7 @@ class DiscoverFeaturesHandler implements ProtocolHandler {
 
                     const match = createRegex(query["match"])
                     for (let protocol of Array.from(PROTOCOLS.values())) {
-                        console.log("Testing protocol:", match, match.test(protocol.routeName), protocol.routeName);
+                        console.debug("[Discover Features] Testing protocol:", match, match.test(protocol.routeName), protocol.routeName);
                         if (match.test(protocol.routeName)) {
                             protocolResponse.push({
                                 "feature-type": "protocol",
