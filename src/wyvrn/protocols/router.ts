@@ -59,6 +59,8 @@ async function loadProtocol(router: Router, protocolName: string): Promise<Proto
 async function loadProtocols(router: Router) {
   await loadProtocol(router, 'trust-ping');
   await loadProtocol(router, 'discover-features');
+  await loadProtocol(router, 'messagepickup');
+  await loadProtocol(router, 'user-profile');
 }
 
 export { Router, loadProtocols };
