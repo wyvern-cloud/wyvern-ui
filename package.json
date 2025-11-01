@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build2": "next build",
     "export": "next export",
-    "start": "webpack serve --mode development --watch --port 8001",
+    "start": "webpack serve --mode development --watch --port 8002",
     "build": "webpack --mode production",
     "start2": "esbuild src/index.ts --bundle --outfile=public/bin/main.js --jsx-factory=m --jsx-fragment='\"[\"' --watch --serve --servedir=public --minify",
     "lint": "next lint"
