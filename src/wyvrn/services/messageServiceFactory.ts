@@ -110,7 +110,7 @@ export enum MessageServiceType {
 export class MessageServiceFactory {
   private static adapter: IMessageServiceAdapter;
   private static currentType: MessageServiceType = 
-    (localStorage.getItem(`${GLOBAL_PREFIX}message-service`) as MessageServiceType) || MessageServiceType.EXAMPLE;
+    (localStorage.getItem(`${GLOBAL_PREFIX}message-service`) as MessageServiceType) || MessageServiceType.AGENT;
 
   static getService(type?: MessageServiceType): IMessageServiceAdapter {
     // If type is specified, create a new adapter of that type
