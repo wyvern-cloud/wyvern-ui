@@ -1,6 +1,8 @@
 
 class TrustPingHandler implements ProtocolHandler {
-    async handle(uri: string, messageEvent: any): Promise<void> {
+    public routeName: string = "https://didcomm.org/trust-ping/2.0";
+    public goalCodes: string[] = ["app.wyvrn", "org.didcomm"];
+    public async handle(uri: string, messageEvent: any): Promise<void> {
         switch (uri) {
             case "https://didcomm.org/trust-ping/2.0/ping":
                 if (messageEvent.body?.response_requested !== false) {
