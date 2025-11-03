@@ -1,5 +1,5 @@
 import m from "mithril";
-import styles from "../../server-list.module.css";
+import styles from "./server-list.module.css";
 
 const OnboardingWizard = {
   view: ({ attrs }) => (
