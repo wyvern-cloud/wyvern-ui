@@ -251,7 +251,7 @@ export class AgentService {
       request.onsuccess = () => {
         const users = request.result;
         const userMap = users.reduce((acc, user) => {
-          acc[user.username] = user;
+          acc[user.did] = user;
           return acc;
         }, {} as Record<string, IUser>);
         resolve(userMap);
@@ -272,7 +272,9 @@ export class AgentService {
       const request = store.getAll();
       
       request.onsuccess = () => {
-        resolve(request.result);
+        let messages = request.result;
+        messages.sort((a, b) => a.timestamp - b.timestamp);
+        resolve(messages);
       };
       
       request.onerror = () => {

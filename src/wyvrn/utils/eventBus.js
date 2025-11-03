@@ -5,6 +5,8 @@ export const eventBus = {
     if (!this.listeners[event]) {
       this.listeners[event] = [];
     }
+    if (this.listeners[event].includes(callback))
+      return;
     this.listeners[event].push(callback);
   },
   emit(event, data) {

@@ -2,6 +2,7 @@ import m from "mithril";
 import styles from "../../server-list.module.css";
 import { UserPFP, UserName } from "../user";
 import w from "../../agent";
+import { eventBus } from '../../utils/eventBus';
 
 const FriendsList = () => {
   let my_did = undefined;
@@ -16,6 +17,10 @@ const FriendsList = () => {
       // Load peers from the agent
       users = await w.getPeers();
       m.redraw();
+      eventBus.on("DIDCOMM::PROTOCOL::USER_PROFILE::PROFILE_UPDATE", (peer) => {
+        // users[peer.did] = peer;
+        m.redraw();
+      });
     },
     view: () => {
       return (

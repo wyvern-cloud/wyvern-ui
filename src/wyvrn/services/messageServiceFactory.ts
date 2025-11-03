@@ -52,6 +52,7 @@ class AgentServiceAdapter implements IMessageServiceAdapter {
       if (userDb) {
         this.cachedUsers = Object.entries(userDb).reduce((acc, [key, user]) => {
           acc[key] = {
+            did: user.did,
             username: user.username,
             displayname: user.displayname,
             pfp: user.pfp || `https://api.dicebear.com/7.x/personas/svg?seed=${user.username}`
@@ -68,7 +69,9 @@ class AgentServiceAdapter implements IMessageServiceAdapter {
           username: msg.username,
           displayname: msg.displayname || msg.username,
           timestamp: msg.timestamp,
-          message: msg.message
+          message: msg.message,
+          to: msg.metadata.originalPayload.to,
+          from: msg.metadata.originalPayload.from,
         }));
       }
     } catch (error) {

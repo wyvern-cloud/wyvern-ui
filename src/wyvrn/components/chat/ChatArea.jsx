@@ -5,15 +5,21 @@ import { MessageServiceFactory, MessageServiceType } from "../../services/messag
 import { exampleService } from "../../services/exampleService";
 import { agentService } from "../../services/agentService";
 import MessageGroup from "./MessageGroup";
+import { on } from "events";
 
 const ChatArea = {
   oninit: (vnode) => {
     vnode.state.messages = [];
     vnode.state.service = MessageServiceFactory.getService();
+    vnode.state.currentDID = vnode.attrs.did;
+    vnode.state.domScroll = true;
     
     // Initial load of messages
     vnode.state.loadMessages = () => {
-      vnode.state.messages = vnode.state.service.getMessages();
+      const currentDID = vnode.state.currentDID;
+      let messages = vnode.state.service.getMessages();
+      messages = messages.filter(msg => msg.to.includes(currentDID) || msg.from === currentDID);
+      vnode.state.messages = messages;
       m.redraw();
     };
     
@@ -36,22 +42,50 @@ const ChatArea = {
         m.redraw();
       }
     });
+
+    eventBus.on("DIDCOMM::AGENT::INITIALIZED", () => {
+      vnode.state.loadMessages();
+    });
     
     // Subscribe to agent messages
-    eventBus.on("messageReceived", async (message) => {
+    eventBus.on("DIDCOMM::PROTOCOL::BASICMESSAGE::MESSAGE", async (message) => {
       // Only add if using agent service
       if (MessageServiceFactory.getCurrentType() === MessageServiceType.AGENT) {
         try {
           const processedMessage = await agentService.processMessage(message);
-          vnode.state.messages.push(processedMessage);
-          m.redraw();
+          vnode.state.service.refreshCache();
+          // vnode.state.messages.push(processedMessage);
+          vnode.state.loadMessages();
+          // m.redraw();
         } catch (error) {
           console.error("Error processing message:", error);
         }
       }
     });
+    eventBus.on("WYVRN::MESSAGE_SENT", async (message) => {
+      if (MessageServiceFactory.getCurrentType() === MessageServiceType.AGENT) {
+        // const processedMessage = await agentService.processMessage(message);
+        await vnode.state.service.refreshCache();
+        vnode.state.loadMessages();
+        vnode.state.domScroll = true;
+      }
+    });
   },
-  
+
+  onupdate: (vnode) => {
+    if (vnode.state.domScroll) {
+      console.debug("Scrolling to bottom");
+      vnode.state.domScroll = false;
+      vnode.dom.scrollTo(0, vnode.dom.scrollHeight, 'instant');
+    }
+    if (vnode.attrs.did !== vnode.state.currentDID) {
+      console.debug("Switching DID to", vnode.attrs.did);
+      vnode.state.currentDID = vnode.attrs.did;
+      vnode.state.domScroll = true;
+      vnode.state.loadMessages();
+    }
+  },
+
   onremove: (vnode) => {
     window.removeEventListener('message-service-changed', vnode.state.serviceListener);
   },
@@ -63,7 +97,7 @@ const ChatArea = {
     for (const message of vnode.state.messages) {
       let lastGroup = messageGroups.length && messageGroups[messageGroups.length - 1];
       if (message.username != lastUser || 
-          (lastGroup && lastGroup[0].timestamp < (message.timestamp - 1000 * 60 * 1))) {
+          (lastGroup && lastGroup[0].timestamp < (message.timestamp - 1000 * 60 * 5))) {
         messageGroups.push([]);
         lastUser = message.username;
       }

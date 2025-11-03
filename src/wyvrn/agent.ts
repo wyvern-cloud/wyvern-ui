@@ -48,6 +48,7 @@ export class WyvrnAgent {
     this.initDatabase();
     await loadProtocols(this.router);
     this.initWorker();
+    eventBus.emit("DIDCOMM::AGENT::INITIALIZED");
   }
 
 	public initWorker() {
@@ -85,6 +86,19 @@ export class WyvrnAgent {
 		return this.my_did;
 	}
 	public send_request(did) {
+    const message = {
+      "id": uuidv4(),
+      "type": "https://didcomm.org/user-profile/1.0/request-profile",
+      "body": {
+        "query": [
+          "displayName"
+        ]
+      },
+    }
+    this.postMessage({
+      type: "sendMessage",
+      payload: { to: did, message },
+    })
 		const message = {
 			"id": uuidv4(),
 			"type": "https://didcomm.org/user-profile/1.0/profile",
@@ -293,6 +307,7 @@ export class WyvrnAgent {
       return;
     } catch (e) {
       console.error("Error handling protocol message:", e);
+      return;
     }
 		switch(msg.type) {
 			// case "https://didcomm.org/trust-ping/2.0/ping":

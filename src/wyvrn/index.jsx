@@ -18,6 +18,9 @@ import SettingsPanel from './components/settings/SettingsPanel';
 // Initialize services
 w.init();
 themeService; // Initialize theme service
+eventBus.on("DIDCOMM::AGENT::INITIALIZED", () => {
+  m.redraw();
+});
 
 var page = () => {
   let serverView = 'dms';
