@@ -8,6 +8,7 @@ import { eventBus } from './utils/eventBus';
 import Sidebar from './components/sidebar';
 import w from './agent';
 import themeService from './services/themeService';
+import { MessageServiceFactory } from "./services/messageServiceFactory";
 
 // Import refactored components
 import ChatContainer from './components/chat/ChatContainer';
@@ -22,8 +23,27 @@ eventBus.on("DIDCOMM::AGENT::INITIALIZED", () => {
   m.redraw();
 });
 
+var onboard = () => {
+  if (MessageServiceFactory.getInitializedState()) {
+    // Do something if the service is initialized
+    m.route.set("/w", null, {replace: true});
+  }
+  return {
+    view: function(vnode) {
+      return (
+        <div class={styles.appLayout}>
+        </div>
+      )
+    }
+  }
+}
+
 var page = () => {
   let serverView = 'dms';
+  if (!MessageServiceFactory.getInitializedState()) {
+    // Do something if the service is not initialized
+    m.route.set("/w/onboard", null, {replace: true, state: {term: "new_user"}});
+  }
   return {
     view: function(vnode) {
       const did = m.route.param('did');
@@ -69,6 +89,7 @@ var settingsPage = () => {
 }
 
 register_route("/w", page)
+register_route("/w/onboard", onboard)
 register_route("/w/did/:did", page)
 register_route("/w/friends", friendsPage)
 register_route("/w/requests", page)

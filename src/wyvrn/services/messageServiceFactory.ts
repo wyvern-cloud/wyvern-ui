@@ -154,6 +154,14 @@ export class MessageServiceFactory {
   static getCurrentType(): MessageServiceType {
     return this.currentType;
   }
+
+  static getInitializedState(): boolean {
+    // localStorage.setItem(`${GLOBAL_PREFIX}message-service`, "agent");
+    if (localStorage.getItem(`${GLOBAL_PREFIX}message-service`)) {
+      return true;
+    }
+    return false;
+  }
 }
 
 // Create a default instance for convenience
