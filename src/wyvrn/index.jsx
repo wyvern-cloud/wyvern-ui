@@ -15,6 +15,7 @@ import ChatContainer from './components/chat/ChatContainer';
 import UserListPanel from './components/users/UserListPanel';
 import FriendsList from './components/friends/FriendsList';
 import SettingsPanel from './components/settings/SettingsPanel';
+import OnboardingWizard from "./onboarding";
 
 // Initialize services
 w.init();
@@ -32,6 +33,7 @@ var onboard = () => {
     view: function(vnode) {
       return (
         <div class={styles.appLayout}>
+          <OnboardingWizard />
         </div>
       )
     }
