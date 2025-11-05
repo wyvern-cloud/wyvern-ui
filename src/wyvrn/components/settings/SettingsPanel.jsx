@@ -4,6 +4,7 @@ import styles from "../../settings-panel.module.css";
 import ThemeSelector from "./ThemeSelector";
 import themeService, { ThemeMode } from "../../services/themeService";
 import w from "../../agent";
+import { GLOBAL_PREFIX } from "../../utils/constants";
 
 const SettingsPanel = {
   oninit: (vnode) => {
@@ -40,8 +41,23 @@ const SettingsPanel = {
 
   clearData: () => {
     if (confirm("Are you sure you want to clear all local data? This will log you out and reset all settings.")) {
-      w.DEVELOPER_clearDataBase();
-      localStorage.removeItem('wyvrn-theme');
+      SettingsPanel._clearData();
+      window.location.reload();
+    }
+  },
+
+  _clearData: () => {
+    w.DEVELOPER_clearDataBase();
+    localStorage.removeItem(`${GLOBAL_PREFIX}theme`);
+  },
+
+  resetOnboarding: () => {
+    if (confirm("Are you sure you want to reset the onboarding process? This will clear your profile and preferences.")) {
+      localStorage.removeItem(`${GLOBAL_PREFIX}onboarding-complete`);
+      localStorage.removeItem(`${GLOBAL_PREFIX}onboarding-stage`);
+      localStorage.removeItem(`${GLOBAL_PREFIX}onboarding-data`);
+      SettingsPanel._clearData();
+      m.route.set("/w/onboard", null, { replace: true });
       window.location.reload();
     }
   },
@@ -93,12 +109,21 @@ const SettingsPanel = {
           
           <div class={styles.section}>
             <h3>Advanced</h3>
-            <button 
-              class={styles.dangerButton}
-              onclick={SettingsPanel.clearData}
-            >
-              Clear Local Data
-            </button>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <button 
+                class={styles.dangerButton}
+                onclick={SettingsPanel.resetOnboarding}
+                style="background: #ffc107; color: #000;"
+              >
+                Reset Onboarding
+              </button>
+              <button 
+                class={styles.dangerButton}
+                onclick={SettingsPanel.clearData}
+              >
+                Clear Local Data
+              </button>
+            </div>
           </div>
         </div>
       </div>

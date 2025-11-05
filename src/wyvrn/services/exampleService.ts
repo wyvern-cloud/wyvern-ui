@@ -6,6 +6,8 @@ const dummyData = {
 			"id": "c8cc5441-2585-4653-b975-a5bfbbfe8b10",
 			"timestamp": 1741974582076,
 			"message": "Hello there!~",
+			"to": ["did:example:neo", "did:example:nori"],
+			"from": "did:example:frostyfrog",
 		},
 		{
 			"username": "neo",
@@ -13,6 +15,8 @@ const dummyData = {
 			"id": "4d539a09-610b-4143-871d-6a7765ca065c",
 			"timestamp": 1741974587616,
 			"message": "Hi~",
+			"to": ["did:example:frostyfrog", "did:example:nori"],
+			"from": "did:example:neo",
 		},
 		{
 			"username": "nori",
@@ -20,6 +24,8 @@ const dummyData = {
 			"id": "e5e9680e-29ac-458d-b467-bb401e578905",
 			"timestamp": 1741978072349,
 			"message": "Hi~",
+			"to": ["did:example:frostyfrog", "did:example:neo"],
+			"from": "did:example:nori",
 		},
 		{
 			"username": "frostyfrog",
@@ -27,6 +33,8 @@ const dummyData = {
 			"id": "5ed3c56a-7aa1-4f1b-af86-a74219ce1779",
 			"timestamp": 1741978533702,
 			"message": "So...",
+			"to": ["did:example:nori", "did:example:neo"],
+			"from": "did:example:frostyfrog",
 		},
 		{
 			"username": "frostyfrog",
@@ -34,6 +42,8 @@ const dummyData = {
 			"id": "fa1fc6e6-9ef8-4f02-bdc7-c52a137be942",
 			"timestamp": 1741978535692,
 			"message": "What are you up to?",
+			"to": ["did:example:nori", "did:example:neo"],
+			"from": "did:example:frostyfrog",
 		},
 		{
 			"username": "neo",
@@ -41,6 +51,8 @@ const dummyData = {
 			"id": "7e4ff35f-2daf-41db-b091-4c62e27d506b",
 			"timestamp": 1741978677668,
 			"message": "Working on my Debut!",
+			"to": ["did:example:frostyfrog", "did:example:nori"],
+			"from": "did:example:neo",
 		},
 		// ...other messages...
 	],

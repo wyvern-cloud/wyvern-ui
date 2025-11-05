@@ -16,25 +16,26 @@ import UserListPanel from './components/users/UserListPanel';
 import FriendsList from './components/friends/FriendsList';
 import SettingsPanel from './components/settings/SettingsPanel';
 import OnboardingWizard from "./onboarding";
+import onboardingService from './services/onboardingService';
 
 // Initialize services
-w.init();
+// w.init();
 themeService; // Initialize theme service
 eventBus.on("DIDCOMM::AGENT::INITIALIZED", () => {
   m.redraw();
 });
 
 var onboard = () => {
-  if (MessageServiceFactory.getInitializedState()) {
-    // Do something if the service is initialized
-    m.route.set("/w", null, {replace: true});
-  }
   return {
+    oninit: function() {
+      // If onboarding is already complete, redirect to main app
+      if (onboardingService.isOnboardingComplete()) {
+        m.route.set("/w", null, {replace: true});
+      }
+    },
     view: function(vnode) {
       return (
-        <div class={styles.appLayout}>
-          <OnboardingWizard />
-        </div>
+        <OnboardingWizard />
       )
     }
   }
@@ -42,11 +43,13 @@ var onboard = () => {
 
 var page = () => {
   let serverView = 'dms';
-  if (!MessageServiceFactory.getInitializedState()) {
-    // Do something if the service is not initialized
-    m.route.set("/w/onboard", null, {replace: true, state: {term: "new_user"}});
-  }
   return {
+    oninit: function() {
+      // If onboarding is not complete, redirect to onboarding
+      if (!onboardingService.isOnboardingComplete()) {
+        m.route.set("/w/onboard", null, {replace: true});
+      }
+    },
     view: function(vnode) {
       const did = m.route.param('did');
       if (m.route.get() === '/w/requests')

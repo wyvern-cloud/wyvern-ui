@@ -1,5 +1,6 @@
 import { IChatMessage, IUser, IRole, IMessage } from './exampleService';
 import { GLOBAL_PREFIX, GLOBAL_DATABASE_NAME } from '../utils/constants';
+import w from '../agent';
 
 export enum MessageType {
   TEXT = 'text',
@@ -40,6 +41,10 @@ export class AgentService {
       maxAgeInDays: config.maxAgeInDays ?? 30
     };
     this.initDatabase();
+  }
+
+  public async activate(): Promise<void> {
+    w.init();
   }
 
   private async initDatabase() {

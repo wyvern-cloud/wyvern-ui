@@ -13,5 +13,13 @@ export const darkTheme: Theme = {
     '--chatlog-bg-color': '#36393f',
     '--chatlog-color': '#dcddde',
     '--textarea-bg-color': '#40444b',
+    
+    // New variables for onboarding
+    '--text-color': '#dcddde',
+    '--text-secondary': '#aaa',
+    '--text-tertiary': '#888',
+    '--border-color': '#444',
+    '--highlight-color': '#7289da',
+    '--input-bg': '#40444b',
   }
 };

@@ -18,6 +18,9 @@ export interface IMessageServiceAdapter {
 
 // Example service adapter (mostly pass-through)
 class ExampleServiceAdapter implements IMessageServiceAdapter {
+  public async activate() {
+  }
+
   getMessages(): IChatMessage[] {
     return exampleService.getMessages();
   }
@@ -43,6 +46,10 @@ class AgentServiceAdapter implements IMessageServiceAdapter {
   constructor() {
     // Initialize from agent service data
     this.refreshCache();
+  }
+
+  public async activate() {
+    await agentService.activate();
   }
   
   private async refreshCache() {
@@ -113,7 +120,7 @@ export enum MessageServiceType {
 export class MessageServiceFactory {
   private static adapter: IMessageServiceAdapter;
   private static currentType: MessageServiceType = 
-    (localStorage.getItem(`${GLOBAL_PREFIX}message-service`) as MessageServiceType) || MessageServiceType.AGENT;
+    (localStorage.getItem(`${GLOBAL_PREFIX}message-service`) as MessageServiceType) || MessageServiceType.EXAMPLE;
 
   static getService(type?: MessageServiceType): IMessageServiceAdapter {
     // If type is specified, create a new adapter of that type
@@ -140,12 +147,13 @@ export class MessageServiceFactory {
         } 
       });
       window.dispatchEvent(event);
+      this.adapter.activate();
     }
 
     // If no type specified and no adapter exists, create default
     if (!this.adapter) {
-      this.currentType = MessageServiceType.AGENT;
-      this.adapter = new AgentServiceAdapter();
+      this.currentType = MessageServiceType.EXAMPLE;
+      this.adapter = new ExampleServiceAdapter();
     }
 
     return this.adapter;
