@@ -2,6 +2,7 @@ import m from 'mithril';
 import {UserPFP, UserName} from "./user";
 import w from '../agent';
 import styles from "../server-list.module.css";
+import { GLOBAL_PREFIX } from '../utils/constants';
 
 
 var Servers = [
@@ -91,8 +92,16 @@ const users = {
 
 
 var MyUserInfo = {
-	view: () => {
-		let item = users["frostyfrog"];
+	oninit: (vnode) => {
+		vnode.state.profile = JSON.parse(localStorage.getItem(`${GLOBAL_PREFIX}profile`) || '{}');
+	},
+	view: (vnode) => {
+		let item = {
+			displayname: vnode.state.profile.displayName,
+			username: "test",
+			pfp: vnode.state.profile.profilePicture,
+			roles: ["Admin", "User"],
+		};
 		return (
 			<div class={styles.myUserInfo}>
 				<div class={styles.userList}>

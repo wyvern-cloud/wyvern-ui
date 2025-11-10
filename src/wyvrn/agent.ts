@@ -27,12 +27,15 @@ export class WyvrnAgent {
 	private connectionService: ConnectionService;
 	private peers = {};
   private webrtcManager: WebRTCManager;
+  private initialized: boolean;
   private db: IDBDatabase | null = null;
+  private profile: { displayName?: string; description?: string; displayPicture?: string } = {};
 
 	constructor() {
 		this.connectionService = new ConnectionService();
     this.router = new Router(this);
     this.webrtcManager = new WebRTCManager(this.handleSignalingMessage.bind(this));
+    this.initialized = false;
 
     // Handle remote call termination
     this.webrtcManager.onCallStateChange = ({ did, connectionId, active }) => {
@@ -44,11 +47,31 @@ export class WyvrnAgent {
 
   public async init() {
     // Load saved peers from the database
+    if (this.initialized) return;
+    this.initialized = true;
     this.loadPeersFromDatabase();
     this.initDatabase();
+    this.loadProfileFromStorage();
     await loadProtocols(this.router);
     this.initWorker();
     eventBus.emit("DIDCOMM::AGENT::INITIALIZED");
+  }
+
+  private loadProfileFromStorage() {
+    const profileData = localStorage.getItem(`${GLOBAL_PREFIX}profile`);
+    if (profileData) {
+      try {
+        const profile = JSON.parse(profileData);
+        this.profile = {
+          displayName: profile.displayName,
+          description: profile.description,
+          displayPicture: profile.profilePicture
+        };
+        console.log('Loaded profile from storage:', this.profile);
+      } catch (e) {
+        console.error('Failed to parse saved profile data', e);
+      }
+    }
   }
 
 	public initWorker() {
@@ -99,31 +122,31 @@ export class WyvrnAgent {
       type: "sendMessage",
       payload: { to: did, message },
     })
-		const message = {
-			"id": uuidv4(),
-			"type": "https://didcomm.org/user-profile/1.0/profile",
-			"body": {
-				"profile": {
-					"displayName": "Wyvrn Alpha",
-					"displayPicture": "#item1",
-					"description": "This is my bio",
-				},
-				"send_back_yours": true,
-			},
-			"attachments": [{
-				"id": "item1",
-				"byte_count": 1386,
-				"media_type": "image/png",
-				"filename": "image1.png",
-				"data": {
-					"base64": "iVBORw0KGgoAAAANSUhEUgAAAFgAAAAfCAYAAABjyArgAAAAAXNSR0IArs4c6QAABSRJREFUaIHtWkFrG0cU/jargG8B+dJDLAsi0xLTQh2pcjABX0LSU6gvvTdqcH6ECcU/wiZRc8kppTTkFIdeDMGNhVQVCgoF6SDZhfZiQeklYG+mB/mN38y+2Z0VCnHjfGBYz7yZefPN997MzipQSuEY+uEDJoIAAHLH/6ggCN6hL+8f1Ei5QaCU0uQyNZ9p+IrNxRfnM5dmfJZAxMwudjLZ29wppXRdLtbqjCIIAm9iCWQfBIFbzZQibAMpTN4Hlbd6kfF/uRTG5ppG9GB3PmY72J03+CFODQW3epEeUBqEGklOnmbY/nLQXIm02cUO+i8vJ/ZXvNoxSE6CVnCze5RILoFWyuX0aSGbq9Llb2Uup+eaRqoLxauv9DORTjk4pmAJfGV9wCfyrsi2ReKKPGB8Ynl7IpnnZMI5epDUS2pVSmGwO5+qXglBEHgde8iO/2VFFr8qczlxT5H8SPPLXiTOoVPBNpnkjEuhrs3D3mnJjrdNy/kSJDJ9UlxlLmfMh8Yh+Gzkkj1XMof3MS1p9816uvBtO7vYSQzvLJDOuOP6Ly2OUkokOfM5mJRn7762DVcSjwZJ2dyOQGW+JKep1y7n0THu4pVLoe6D+uu/vGwo3JtgTqzkcLkUpjq6uR2iXkoep9k9AmDu8OMoOW1zpnFavQgL5xtefdpo9aqaF35y4PAimIe07TBNngYB4qpUSqFWB+o1uY7KZhc7qMzl0Oweodk9Mkj28Y/3ay/UYHde1//46GMtCCI3LC7p/qL+TmwMXk82C+cbIskcqQQnhR457fPK6AsimZ4lfwB3WHNypboRzPqwuISLX/wOANhvfIo3g19ibXk9MJqrRLKNTDnYzpH2GxCpOYt6a3UYKqa+bPBIAeIbDW9LC2QTPYnNMg0UeQT9ZE+U5z07v9hhYBOUFRLJQDyP+p4AyM6VYmy1Rf0dhMXPAABvBvH0AACDH/5FWFwCTV1KIxLOJVXa+bVWd9vSy0hW9RKIZNdFCv3xOjtiuC1vb8+FxuOI+juppJFNKrn5Nf1opAiXkiSHfFGv+du60gW/qUq6s/W1GxevD/YwNV0wytqH7vwLCDk4KVVkga2YJPUmjS/VAXEC7X6lE40PXh/sedtyv1xC8trkXGTZg/hsVj5IWmQ+maT+kyZN2NwOsbpcjZ2DD//4PGb716s9FFYOjLL2YRWb2+Z1QaX6nWEjEjwuWUnqA9LVOy7G6bdek9Pe1HQB+OQ37P00bZQXVg6M9KBTwzawuhwBYGliuK4fnQrmZAFxgvndp7RZub6IpJHwfGMLADCz4VZx2obpAn+RKZdCrC5HuPT3Q7Q/+sZQ8dR0AYUVM1VI5LZ6EVaXk69lYwTTBPkkAfloBgAzV0b2N+7e1HU8V3IkkcDHnRTSIgoA8rf2MXz6EP8AuDBzckqxNzNC+7AK4CQdNBv3TIPhOm4/UPj+W+ujp2uCRKBNGJXb7YnoSaSBmStbRjQopZxlHHyxk1AuhWg27iF/nDeHT4H8tTsAzHMuvSYPX9zHJXSQv7UPDNfR7B7p+5VWL0JlLofbD8a4i6DJ+uD5xpb3BHmbpHHtaJHKpP5u3L0ZS1m0IE8eXz8J7eE6kF9D/todI2KHL+7HypBfM8llG+nFhWcxX/Q3OalyEkgj+22kBgn7v478oAXhBJP6pC/rUplNbqsX4auvfzbs/mx/OVpY/suet0XyacWTx9f1c5bvh/Z9hkQuAE0w8OG3aRPHMa9BwELg//+rktOFAAD+A6SeyxzbazMZAAAAAElFTkSuQmCC"
-				},
-			}]
-		}
-    this.postMessage({
-      type: "sendMessage",
-      payload: { to: did, message },
-    })
+		// const message = {
+		// 	"id": uuidv4(),
+		// 	"type": "https://didcomm.org/user-profile/1.0/profile",
+		// 	"body": {
+		// 		"profile": {
+		// 			"displayName": this.profile.displayName,
+		// 			"displayPicture": "#item1",
+		// 			"description": this.profile.description,
+		// 		},
+		// 		"send_back_yours": true,
+		// 	},
+		// 	"attachments": [{
+		// 		"id": "item1",
+		// 		"byte_count": 1386,
+		// 		"media_type": "image/png",
+		// 		"filename": "image1.png",
+		// 		"data": {
+		// 			"base64": "iVBORw0KGgoAAAANSUhEUgAAAFgAAAAfCAYAAABjyArgAAAAAXNSR0IArs4c6QAABSRJREFUaIHtWkFrG0cU/jargG8B+dJDLAsi0xLTQh2pcjABX0LSU6gvvTdqcH6ECcU/wiZRc8kppTTkFIdeDMGNhVQVCgoF6SDZhfZiQeklYG+mB/mN38y+2Z0VCnHjfGBYz7yZefPN997MzipQSuEY+uEDJoIAAHLH/6ggCN6hL+8f1Ei5QaCU0uQyNZ9p+IrNxRfnM5dmfJZAxMwudjLZ29wppXRdLtbqjCIIAm9iCWQfBIFbzZQibAMpTN4Hlbd6kfF/uRTG5ppG9GB3PmY72J03+CFODQW3epEeUBqEGklOnmbY/nLQXIm02cUO+i8vJ/ZXvNoxSE6CVnCze5RILoFWyuX0aSGbq9Llb2Uup+eaRqoLxauv9DORTjk4pmAJfGV9wCfyrsi2ReKKPGB8Ynl7IpnnZMI5epDUS2pVSmGwO5+qXglBEHgde8iO/2VFFr8qczlxT5H8SPPLXiTOoVPBNpnkjEuhrs3D3mnJjrdNy/kSJDJ9UlxlLmfMh8Yh+Gzkkj1XMof3MS1p9816uvBtO7vYSQzvLJDOuOP6Ly2OUkokOfM5mJRn7762DVcSjwZJ2dyOQGW+JKep1y7n0THu4pVLoe6D+uu/vGwo3JtgTqzkcLkUpjq6uR2iXkoep9k9AmDu8OMoOW1zpnFavQgL5xtefdpo9aqaF35y4PAimIe07TBNngYB4qpUSqFWB+o1uY7KZhc7qMzl0Oweodk9Mkj28Y/3ay/UYHde1//46GMtCCI3LC7p/qL+TmwMXk82C+cbIskcqQQnhR457fPK6AsimZ4lfwB3WHNypboRzPqwuISLX/wOANhvfIo3g19ibXk9MJqrRLKNTDnYzpH2GxCpOYt6a3UYKqa+bPBIAeIbDW9LC2QTPYnNMg0UeQT9ZE+U5z07v9hhYBOUFRLJQDyP+p4AyM6VYmy1Rf0dhMXPAABvBvH0AACDH/5FWFwCTV1KIxLOJVXa+bVWd9vSy0hW9RKIZNdFCv3xOjtiuC1vb8+FxuOI+juppJFNKrn5Nf1opAiXkiSHfFGv+du60gW/qUq6s/W1GxevD/YwNV0wytqH7vwLCDk4KVVkga2YJPUmjS/VAXEC7X6lE40PXh/sedtyv1xC8trkXGTZg/hsVj5IWmQ+maT+kyZN2NwOsbpcjZ2DD//4PGb716s9FFYOjLL2YRWb2+Z1QaX6nWEjEjwuWUnqA9LVOy7G6bdek9Pe1HQB+OQ37P00bZQXVg6M9KBTwzawuhwBYGliuK4fnQrmZAFxgvndp7RZub6IpJHwfGMLADCz4VZx2obpAn+RKZdCrC5HuPT3Q7Q/+sZQ8dR0AYUVM1VI5LZ6EVaXk69lYwTTBPkkAfloBgAzV0b2N+7e1HU8V3IkkcDHnRTSIgoA8rf2MXz6EP8AuDBzckqxNzNC+7AK4CQdNBv3TIPhOm4/UPj+W+ujp2uCRKBNGJXb7YnoSaSBmStbRjQopZxlHHyxk1AuhWg27iF/nDeHT4H8tTsAzHMuvSYPX9zHJXSQv7UPDNfR7B7p+5VWL0JlLofbD8a4i6DJ+uD5xpb3BHmbpHHtaJHKpP5u3L0ZS1m0IE8eXz8J7eE6kF9D/todI2KHL+7HypBfM8llG+nFhWcxX/Q3OalyEkgj+22kBgn7v478oAXhBJP6pC/rUplNbqsX4auvfzbs/mx/OVpY/suet0XyacWTx9f1c5bvh/Z9hkQuAE0w8OG3aRPHMa9BwELg//+rktOFAAD+A6SeyxzbazMZAAAAAElFTkSuQmCC"
+		// 		},
+		// 	}]
+		// }
+    // this.postMessage({
+    //   type: "sendMessage",
+    //   payload: { to: did, message },
+    // })
     // if(message.type == "https://didcomm.org/basicmessage/2.0/message") {
     //   if(message.body.content.startsWith("/"))
     //     return;
@@ -274,14 +297,15 @@ export class WyvrnAgent {
   }
 
 	public handle_profile(did) {
+    throw new Error("Profile handling deprecated.");
 		const message = {
 			"id": uuidv4(),
 			"type": "https://didcomm.org/user-profile/1.0/profile",
 			"body": {
 				"profile": {
-					"displayName": "Wyvrn Alpha",
+					"displayName": this.profile.displayName,
 					"displayPicture": "#item1",
-					"description": "This is my bio",
+					"description": this.profile.description,
 				},
 				"send_back_yours": true,
 			},

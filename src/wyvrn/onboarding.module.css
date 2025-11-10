@@ -457,6 +457,95 @@ a:visited {
   color: color-mix(in srgb, var(--highlight-color, #7289da) 85%, purple 15%);
 }
 
+/* Image Cropper Styles */
+.imageCropper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.cropperCanvas {
+  border: 2px solid var(--border-color, #444);
+  border-radius: 8px;
+  cursor: move;
+  background: #000;
+}
+
+.cropperInstructions {
+  font-size: 12px;
+  color: var(--text-secondary, #aaa);
+}
+
+.cropperActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.primaryButton {
+  padding: 10px 20px;
+  background: var(--highlight-color, #7289da);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.primaryButton:hover {
+  background: color-mix(in srgb, var(--highlight-color, #7289da) 85%, white 15%);
+}
+
+.secondaryButton {
+  padding: 10px 20px;
+  background: var(--input-bg, #40444b);
+  color: var(--text-color, #fff);
+  border: 1px solid var(--border-color, #444);
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.secondaryButton:hover {
+  background: color-mix(in srgb, var(--input-bg, #40444b) 85%, white 15%);
+}
+
+.fileInput {
+  display: none;
+}
+
+.fileInputLabel {
+  display: inline-block;
+  padding: 10px 20px;
+  background: var(--input-bg, #40444b);
+  color: var(--text-color, #fff);
+  border: 1px solid var(--border-color, #444);
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.fileInputLabel:hover {
+  background: color-mix(in srgb, var(--input-bg, #40444b) 85%, white 15%);
+}
+
+.uploadSection {
+  margin-top: 12px;
+}
+
+.cropperSection {
+  margin-top: 16px;
+}
+
 /* Privacy Stage Styles */
 .privacyContainer,
 .notificationContainer,

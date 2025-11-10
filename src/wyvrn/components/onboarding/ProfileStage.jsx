@@ -1,6 +1,7 @@
 import m from "mithril";
 import onboardingService from "../../services/onboardingService";
 import styles from "../../onboarding.module.css";
+import ImageCropper from "../ImageCropper";
 
 const ProfileStage = {
 
@@ -10,6 +11,10 @@ const ProfileStage = {
     vnode.state.description = data.description || '';
     vnode.state.profilePicture = data.profilePicture || '';
     vnode.state.useDefaultPfp = !data.profilePicture;
+    vnode.state.useUploadedImage = false;
+    vnode.state.uploadedImageData = null;
+    vnode.state.showCropper = false;
+    vnode.state.cropperRef = null;
   },
 
   view: (vnode) => {
@@ -33,6 +38,8 @@ const ProfileStage = {
 
     const handleUseDefaultPfp = (e) => {
       vnode.state.useDefaultPfp = e.target.checked;
+      vnode.state.useUploadedImage = false;
+      vnode.state.showCropper = false;
       if (e.target.checked) {
         const defaultPfp = vnode.state.displayName 
           ? `https://api.dicebear.com/7.x/personas/svg?seed=${encodeURIComponent(vnode.state.displayName)}`
@@ -40,6 +47,45 @@ const ProfileStage = {
         vnode.state.profilePicture = defaultPfp;
         onboardingService.updateData({ profilePicture: defaultPfp });
       }
+      m.redraw();
+    };
+
+    const handleFileSelect = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        vnode.state.uploadedImageData = event.target.result;
+        vnode.state.useUploadedImage = true;
+        vnode.state.useDefaultPfp = false;
+        vnode.state.showCropper = true;
+        m.redraw();
+      };
+      reader.readAsDataURL(file);
+    };
+
+    const handleCropComplete = () => {
+      if (vnode.state.cropperRef) {
+        const croppedImage = vnode.state.cropperRef.getCroppedImage(vnode.state.cropperRef);
+        if (croppedImage) {
+          vnode.state.profilePicture = croppedImage;
+          onboardingService.updateData({ profilePicture: croppedImage });
+          vnode.state.showCropper = false;
+          m.redraw();
+        }
+      }
+    };
+
+    const handleCancelCrop = () => {
+      vnode.state.showCropper = false;
+      vnode.state.useUploadedImage = false;
+      vnode.state.uploadedImageData = null;
       m.redraw();
     };
 
@@ -109,20 +155,46 @@ const ProfileStage = {
             <span class={styles.checkboxText}>Use auto-generated avatar</span>
           </label>
 
-          {!vnode.state.useDefaultPfp && (
-            <input
-              type="text"
-              placeholder="Enter image URL (optional)"
-              value={vnode.state.profilePicture}
-              oninput={handleProfilePictureInput}
-              class={styles.formInput}
-            />
+          {!vnode.state.useDefaultPfp && !vnode.state.showCropper && (
+            <div class={styles.uploadSection}>
+              <input
+                type="file"
+                accept="image/*"
+                onchange={handleFileSelect}
+                class={styles.fileInput}
+                id="profile-pic-input"
+              />
+              <label for="profile-pic-input" class={styles.fileInputLabel}>
+                {vnode.state.useUploadedImage ? 'Change Image' : 'Upload Image'}
+              </label>
+              <div class={styles.formHint}>
+                Upload an image from your device to use as your profile picture
+              </div>
+            </div>
           )}
-          <div class={styles.formHint}>
-            {vnode.state.useDefaultPfp 
-              ? 'A unique avatar will be generated based on your display name'
-              : 'Enter a URL to an image you\'d like to use as your profile picture'}
-          </div>
+
+          {vnode.state.showCropper && vnode.state.uploadedImageData && (
+            <div class={styles.cropperSection}>
+              <ImageCropper 
+                imageData={vnode.state.uploadedImageData}
+                oncreate={(cropperVnode) => { vnode.state.cropperRef = cropperVnode.state; }}
+              />
+              <div class={styles.cropperActions}>
+                <button 
+                  class={styles.secondaryButton}
+                  onclick={handleCancelCrop}
+                >
+                  Cancel
+                </button>
+                <button 
+                  class={styles.primaryButton}
+                  onclick={handleCropComplete}
+                >
+                  Apply Crop
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Validation Message */}

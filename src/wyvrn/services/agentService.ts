@@ -259,6 +259,11 @@ export class AgentService {
           acc[user.did] = user;
           return acc;
         }, {} as Record<string, IUser>);
+        userMap[w.getMyDID()] = {
+          username: w.getMyDID(),
+          displayname: w.profile.displayName,
+          pfp: w.profile.displayPicture,
+        };
         resolve(userMap);
       };
       
