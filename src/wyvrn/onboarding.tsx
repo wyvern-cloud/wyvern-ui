@@ -18,15 +18,25 @@
 import m from "mithril";
 import styles from "./onboarding.module.css";
 import onboardingService from "./services/onboardingService";
+import TermsStage from "./components/onboarding/TermsStage";
 import ThemeStage from "./components/onboarding/ThemeStage";
 import MediatorStage from "./components/onboarding/MediatorStage";
 import ProfileStage from "./components/onboarding/ProfileStage";
+import PrivacyStage from "./components/onboarding/PrivacyStage";
+import NotificationStage from "./components/onboarding/NotificationStage";
+import BackupStage from "./components/onboarding/BackupStage";
+import ImportStage from "./components/onboarding/ImportStage";
 
 // Map stage IDs to their respective components
 const STAGE_COMPONENTS = {
+  terms: TermsStage,
   theme: ThemeStage,
   mediator: MediatorStage,
-  profile: ProfileStage
+  profile: ProfileStage,
+  privacy: PrivacyStage,
+  notifications: NotificationStage,
+  backup: BackupStage,
+  import: ImportStage
 };
 
 const OnboardingWizard = {
@@ -96,35 +106,70 @@ const OnboardingWizard = {
         <div class={styles.progressContainer}>
           <div class={styles.progressContent}>
             <div class={styles.progressSteps}>
-              {onboardingService.getStages().map((stage, index) => {
-                const isActive = index === currentStageIndex;
-                const isCompleted = index < currentStageIndex;
-                const isClickable = index < currentStageIndex;
+              {(() => {
+                // Calculate which stages to show (max 3)
+                let visibleStages = [];
+                const allStages = onboardingService.getStages();
+                
+                if (totalStages <= 3) {
+                  // Show all stages if 3 or fewer
+                  visibleStages = allStages.map((stage, index) => ({ stage, index }));
+                } else if (currentStageIndex === 0) {
+                  // First stage: show current, next, next+1
+                  visibleStages = [
+                    { stage: allStages[0], index: 0 },
+                    { stage: allStages[1], index: 1 },
+                    { stage: allStages[2], index: 2 }
+                  ];
+                } else if (currentStageIndex === totalStages - 1) {
+                  // Last stage: show previous+1, previous, current
+                  visibleStages = [
+                    { stage: allStages[currentStageIndex - 2], index: currentStageIndex - 2 },
+                    { stage: allStages[currentStageIndex - 1], index: currentStageIndex - 1 },
+                    { stage: allStages[currentStageIndex], index: currentStageIndex }
+                  ];
+                } else {
+                  // Middle stages: show previous, current, next
+                  visibleStages = [
+                    { stage: allStages[currentStageIndex - 1], index: currentStageIndex - 1 },
+                    { stage: allStages[currentStageIndex], index: currentStageIndex },
+                    { stage: allStages[currentStageIndex + 1], index: currentStageIndex + 1 }
+                  ];
+                }
 
-                return (
-                  <div 
-                    key={stage.id}
-                    class={styles.progressStep}
-                  >
+                return visibleStages.map(({ stage, index }, arrayIndex) => {
+                  const isActive = index === currentStageIndex;
+                  const isCompleted = index < currentStageIndex;
+                  const isClickable = index < currentStageIndex;
+
+                  return (
                     <div 
-                      class={`${styles.stepButton} ${isClickable ? styles.clickable : ''}`}
-                      onclick={isClickable ? () => handleStageClick(index) : null}
+                      key={stage.id}
+                      class={styles.progressStep}
                     >
-                      <div class={`${styles.stepCircle} ${isActive ? styles.active : isCompleted ? styles.completed : styles.inactive}`}>
-                        {isCompleted ? '✓' : index + 1}
-                      </div>
-                      <div class={styles.stepLabel}>
-                        <div class={`${styles.stepLabelText} ${isActive ? styles.active : styles.inactive}`}>
-                          {stage.title}
+                      <div 
+                        class={`${styles.stepButton} ${isClickable ? styles.clickable : ''}`}
+                        onclick={isClickable ? () => handleStageClick(index) : null}
+                      >
+                        <div class={`${styles.stepCircle} ${isActive ? styles.active : isCompleted ? styles.completed : styles.inactive}`}>
+                          {isCompleted ? '✓' : index + 1}
+                        </div>
+                        <div class={styles.stepLabel}>
+                          <div class={`${styles.stepLabelText} ${isActive ? styles.active : styles.inactive}`}>
+                            {stage.title}
+                          </div>
                         </div>
                       </div>
+                      {arrayIndex < visibleStages.length - 1 && (
+                        <div class={`${styles.progressConnector} ${isCompleted ? styles.completed : styles.incomplete}`} />
+                      )}
                     </div>
-                    {index < totalStages - 1 && (
-                      <div class={`${styles.progressConnector} ${isCompleted ? styles.completed : styles.incomplete}`} />
-                    )}
-                  </div>
-                );
-              })}
+                  );
+                });
+              })()}
+            </div>
+            <div class={styles.progressInfo}>
+              Step {currentStageIndex + 1} of {totalStages}
             </div>
           </div>
         </div>

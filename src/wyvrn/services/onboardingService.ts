@@ -2,12 +2,42 @@ import { GLOBAL_PREFIX } from '../utils/constants';
 import { MessageServiceFactory, MessageServiceType } from './messageServiceFactory';
 
 export interface OnboardingStageData {
+  // Theme stage
   theme?: string;
+  
+  // Mediator stage
   mediator?: string;
+  
+  // Profile stage
   displayName?: string;
   username?: string;
   profilePicture?: string;
   description?: string;
+  
+  // Privacy stage
+  acceptAnalytics?: boolean;
+  acceptCrashReports?: boolean;
+  sharePresence?: boolean;
+  allowDirectMessages?: boolean;
+  
+  // Notification stage
+  enableNotifications?: boolean;
+  notifyMessages?: boolean;
+  notifyFriendRequests?: boolean;
+  notifyMentions?: boolean;
+  playSounds?: boolean;
+  
+  // Backup stage
+  autoBackup?: boolean;
+  backupFrequency?: string;
+  
+  // Import stage
+  skipImport?: boolean;
+  importedData?: any;
+  
+  // Terms stage
+  acceptedTerms?: boolean;
+  acceptedPrivacy?: boolean;
 }
 
 export interface OnboardingStage {
@@ -39,6 +69,20 @@ class OnboardingService {
   private initializeStages() {
     this.stages = [
       {
+        id: 'terms',
+        title: 'Terms of Service',
+        description: 'Review and accept our terms',
+        validate: (data) => !!data.acceptedTerms && !!data.acceptedPrivacy,
+        getValidationMessage: () => 'You must accept both the Terms of Service and Privacy Policy to continue'
+      },
+      {
+        id: 'import',
+        title: 'Import Data',
+        description: 'Restore from a previous backup',
+        validate: () => true, // Import is optional
+        getValidationMessage: () => ''
+      },
+      {
         id: 'theme',
         title: 'Choose Your Theme',
         description: 'Select how you want Wyvrn to look',
@@ -64,6 +108,27 @@ class OnboardingService {
           if (data.displayName.trim().length < 2) return 'Display name must be at least 2 characters';
           return 'Please complete your profile';
         }
+      },
+      {
+        id: 'privacy',
+        title: 'Privacy & Security',
+        description: 'Configure your privacy preferences',
+        validate: () => true, // All privacy settings are optional
+        getValidationMessage: () => ''
+      },
+      {
+        id: 'notifications',
+        title: 'Notifications',
+        description: 'Choose how you want to be notified',
+        validate: () => true, // All notification settings are optional
+        getValidationMessage: () => ''
+      },
+      {
+        id: 'backup',
+        title: 'Backup Your Data',
+        description: 'Keep your data safe with backups',
+        validate: () => true, // Backup is optional
+        getValidationMessage: () => ''
       }
       // To add more stages:
       // 1. Add the stage definition here with id, title, description, validate, and getValidationMessage
@@ -157,6 +222,14 @@ class OnboardingService {
       throw new Error('Cannot complete onboarding: not all stages are valid');
     }
 
+    // Apply imported data first if available
+    if (this.data.importedData && !this.data.skipImport) {
+      const imported = this.data.importedData;
+      if (imported.theme) localStorage.setItem(`${GLOBAL_PREFIX}theme`, imported.theme);
+      if (imported.profile) localStorage.setItem(`${GLOBAL_PREFIX}profile`, imported.profile);
+      if (imported.mediator) localStorage.setItem(`${GLOBAL_PREFIX}mediator`, imported.mediator);
+    }
+
     // Save onboarding data to localStorage
     localStorage.setItem(`${GLOBAL_PREFIX}onboarding-complete`, 'true');
     localStorage.setItem(`${GLOBAL_PREFIX}message-service`, 'agent');
@@ -180,6 +253,36 @@ class OnboardingService {
       };
       localStorage.setItem(`${GLOBAL_PREFIX}profile`, JSON.stringify(profileData));
     }
+
+    // Save privacy settings
+    const privacySettings = {
+      acceptAnalytics: this.data.acceptAnalytics ?? true,
+      acceptCrashReports: this.data.acceptCrashReports ?? true,
+      sharePresence: this.data.sharePresence ?? true,
+      allowDirectMessages: this.data.allowDirectMessages ?? true
+    };
+    localStorage.setItem(`${GLOBAL_PREFIX}privacy`, JSON.stringify(privacySettings));
+
+    // Save notification settings
+    const notificationSettings = {
+      enableNotifications: this.data.enableNotifications ?? true,
+      notifyMessages: this.data.notifyMessages ?? true,
+      notifyFriendRequests: this.data.notifyFriendRequests ?? true,
+      notifyMentions: this.data.notifyMentions ?? true,
+      playSounds: this.data.playSounds ?? true
+    };
+    localStorage.setItem(`${GLOBAL_PREFIX}notifications`, JSON.stringify(notificationSettings));
+
+    // Save backup settings
+    const backupSettings = {
+      autoBackup: this.data.autoBackup ?? false,
+      backupFrequency: this.data.backupFrequency || 'weekly'
+    };
+    localStorage.setItem(`${GLOBAL_PREFIX}backup`, JSON.stringify(backupSettings));
+
+    // Save terms acceptance
+    localStorage.setItem(`${GLOBAL_PREFIX}terms-accepted`, 'true');
+    localStorage.setItem(`${GLOBAL_PREFIX}terms-accepted-date`, new Date().toISOString());
 
     MessageServiceFactory.getService(MessageServiceType.AGENT);
 
