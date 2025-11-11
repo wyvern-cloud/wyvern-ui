@@ -156,6 +156,7 @@
 	align-items: center;
 	margin: 0.2rem 1rem;
 	user-select: none;
+	color: color-mix(in srgb, var(--chatlog-color) 90%, black 35%);
 }
 .userListEntry:hover {
 	background-color: rgba(255,255,255,0.2);
@@ -229,15 +230,17 @@
 	outline: none;
 	resize: none;
 	background-color: rgb(from var(--textarea-bg-color) calc(r + 20) calc(g + 20) calc(b + 20));
-	border-top-left-radius: 12px;
-	border-bottom-left-radius: 12px;
+	border-top-left-radius: 6px;
+	border-bottom-left-radius: 6px;
+	padding: 12px;
+	color: var(--text-color);
 }
 .textbox button {
-	border-top-right-radius: 12px;
-	border-bottom-right-radius: 12px;
+	border-top-right-radius: 6px;
+	border-bottom-right-radius: 6px;
 	background-color: rgb(from var(--textarea-bg-color) calc(r + 20) calc(g + 20) calc(b + 20));
-	--text-color: rgb(from var(--textarea-bg-color) calc(r - 80) calc(g - 80) calc(b - 80));
-	border-color: var(--text-color);
+	--text-color: rgb(from var(--text-color) calc(r - 80) calc(g - 80) calc(b - 80));
+	border-width: 0px;
 	color: var(--text-color);
 	font-weight: bold;
 }
