@@ -60,7 +60,7 @@ var page = () => {
         <div class={styles.appLayout}>
           <Sidebar />
           <ChatContainer did={did} />
-          <UserListPanel />
+          { serverView === 'server' && <UserListPanel /> }
         </div>
       )
     }
