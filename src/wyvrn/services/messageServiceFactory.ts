@@ -85,8 +85,9 @@ class AgentServiceAdapter implements IMessageServiceAdapter {
       console.error('Error refreshing agent service cache', error);
     }
   }
-  
-  getMessages(): IChatMessage[] {
+
+  async getMessages(): Promise<IChatMessage[]> {
+    await this.refreshCache();
     return this.cachedMessages;
   }
   
@@ -124,11 +125,15 @@ export class MessageServiceFactory {
 
   static getService(type?: MessageServiceType): IMessageServiceAdapter {
     // If type is specified, create a new adapter of that type
-    if (type && (!this.adapter || type !== this.currentType)) {
-      this.currentType = type;
-      localStorage.setItem(`${GLOBAL_PREFIX}message-service`, type); // Save to localStorage
+    const new_type = type && (!this.adapter || type !== this.currentType);
+    const storage_type = !this.adapter && this.currentType;
+    if (new_type || storage_type) {
+      if (!storage_type) {
+        this.currentType = type;
+        localStorage.setItem(`${GLOBAL_PREFIX}message-service`, type); // Save to localStorage
+      }
 
-      switch (type) {
+      switch (this.currentType) {
         case MessageServiceType.EXAMPLE:
           this.adapter = new ExampleServiceAdapter();
           break;
@@ -136,7 +141,7 @@ export class MessageServiceFactory {
           this.adapter = new AgentServiceAdapter();
           break;
         default:
-          throw new Error(`Unknown message service type: ${type}`);
+          throw new Error(`Unknown message service type: ${this.currentType}`);
       }
 
       // Dispatch custom event to notify components
@@ -152,6 +157,7 @@ export class MessageServiceFactory {
 
     // If no type specified and no adapter exists, create default
     if (!this.adapter) {
+      console.warn("No existing adapter, creating default EXAMPLE adapter");
       this.currentType = MessageServiceType.EXAMPLE;
       this.adapter = new ExampleServiceAdapter();
     }

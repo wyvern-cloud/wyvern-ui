@@ -15,9 +15,9 @@ const ChatArea = {
     vnode.state.domScroll = true;
     
     // Initial load of messages
-    vnode.state.loadMessages = () => {
+    vnode.state.loadMessages = async () => {
       const currentDID = vnode.state.currentDID;
-      let messages = vnode.state.service.getMessages();
+      let messages = await vnode.state.service.getMessages();
       messages = messages.filter(msg => msg.to.includes(currentDID) || msg.from === currentDID);
       vnode.state.messages = messages;
       m.redraw();
@@ -27,9 +27,9 @@ const ChatArea = {
     vnode.state.loadMessages();
     
     // Listen for message service changes
-    vnode.state.serviceListener = (e) => {
+    vnode.state.serviceListener = async (e) => {
       vnode.state.service = e.detail.service;
-      vnode.state.loadMessages();
+      await vnode.state.loadMessages();
     };
     
     window.addEventListener('message-service-changed', vnode.state.serviceListener);
@@ -43,8 +43,8 @@ const ChatArea = {
       }
     });
 
-    eventBus.on("DIDCOMM::AGENT::INITIALIZED", () => {
-      vnode.state.loadMessages();
+    eventBus.on("DIDCOMM::AGENT::INITIALIZED", async () => {
+      await vnode.state.loadMessages();
     });
     
     // Subscribe to agent messages
@@ -53,9 +53,10 @@ const ChatArea = {
       if (MessageServiceFactory.getCurrentType() === MessageServiceType.AGENT) {
         try {
           const processedMessage = await agentService.processMessage(message);
-          vnode.state.service.refreshCache();
+          const service = MessageServiceFactory.getService();
+          await service.refreshCache();
           // vnode.state.messages.push(processedMessage);
-          vnode.state.loadMessages();
+          await vnode.state.loadMessages();
           // m.redraw();
         } catch (error) {
           console.error("Error processing message:", error);
@@ -65,8 +66,9 @@ const ChatArea = {
     eventBus.on("WYVRN::MESSAGE_SENT", async (message) => {
       if (MessageServiceFactory.getCurrentType() === MessageServiceType.AGENT) {
         // const processedMessage = await agentService.processMessage(message);
-        await vnode.state.service.refreshCache();
-        vnode.state.loadMessages();
+        const service = MessageServiceFactory.getService();
+        await service.refreshCache();
+        await vnode.state.loadMessages();
         vnode.state.domScroll = true;
       }
     });
@@ -93,7 +95,7 @@ const ChatArea = {
   view: (vnode) => {
     let messageGroups = [];
     let lastUser = undefined;
-    
+
     for (const message of vnode.state.messages) {
       let lastGroup = messageGroups.length && messageGroups[messageGroups.length - 1];
       if (message.username != lastUser || 
@@ -114,7 +116,7 @@ const ChatArea = {
           };
           
           return (
-            <MessageGroup key={user.username} user={user} messages={item} />
+            <MessageGroup key={user.username + item[0].timestamp} user={user} messages={item} />
           );
         })}
       </div>

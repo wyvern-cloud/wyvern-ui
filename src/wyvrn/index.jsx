@@ -8,7 +8,7 @@ import { eventBus } from './utils/eventBus';
 import Sidebar from './components/sidebar';
 import w from './agent';
 import themeService from './services/themeService';
-import { MessageServiceFactory } from "./services/messageServiceFactory";
+import { MessageServiceFactory, MessageServiceType } from "./services/messageServiceFactory";
 
 // Import refactored components
 import ChatContainer from './components/chat/ChatContainer';
@@ -44,10 +44,16 @@ var onboard = () => {
 var page = () => {
   let serverView = 'dms';
   return {
-    oninit: function() {
+    oninit: async function() {
       // If onboarding is not complete, redirect to onboarding
       if (!onboardingService.isOnboardingComplete()) {
         m.route.set("/w/onboard", null, {replace: true});
+      } else {
+        // Initialize message service if not already done
+        if (MessageServiceFactory.getCurrentType() === null) {
+          MessageServiceFactory.setServiceType(MessageServiceType.AGENT);
+        }
+        await MessageServiceFactory.getService().activate();
       }
     },
     view: function(vnode) {

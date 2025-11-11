@@ -48,6 +48,7 @@ export class AgentService {
   }
 
   private async initDatabase() {
+    await w.waitForStartup();
     return new Promise<void>((resolve, reject) => {
       const request = indexedDB.open(`${GLOBAL_PREFIX}${GLOBAL_DATABASE_NAME}`, 1);
 
