@@ -593,10 +593,30 @@ export class WyvrnAgent {
 
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result;
+        
+        // Messages store
+        if (!db.objectStoreNames.contains('messages')) {
+          const messagesStore = db.createObjectStore('messages', { 
+            keyPath: 'id', 
+            autoIncrement: false 
+          });
+          messagesStore.createIndex('timestamp', 'timestamp', { unique: false });
+          messagesStore.createIndex('type', 'type', { unique: false });
+          messagesStore.createIndex('sender', 'sender', { unique: false });
+        }
 
-        // Create 'users' object store if it doesn't exist
+        // Users store
         if (!db.objectStoreNames.contains('users')) {
-          db.createObjectStore('users', { keyPath: 'did' });
+          const usersStore = db.createObjectStore('users', { 
+            keyPath: 'did', 
+            autoIncrement: false 
+          });
+          usersStore.createIndex('displayname', 'displayname', { unique: false });
+        }
+
+        // Metadata store for system-wide settings
+        if (!db.objectStoreNames.contains('metadata')) {
+          db.createObjectStore('metadata', { keyPath: 'key' });
         }
       };
 
