@@ -1,6 +1,7 @@
 export enum ThemeMode {
     LIGHT = 'light',
     DARK = 'dark',
+    TOKYO_NIGHT = 'tokyo_night',
     DEVELOPER = 'developer',
     SYSTEM = 'system'
   }
