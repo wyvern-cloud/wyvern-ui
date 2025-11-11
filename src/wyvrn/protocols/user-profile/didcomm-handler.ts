@@ -33,8 +33,9 @@ class UserProfileHandler implements ProtocolHandler {
                 console.log("NEW PEER", this.agent.peers)
                 eventBus.emit("DIDCOMM::PROTOCOL::USER_PROFILE::PROFILE_UPDATE", peer);
 
-                if (msg.body?.profile?.send_back_yours) {
-                    await this.agent.send_profile(msg.from);
+                console.warn("Profile received:", msg.body);
+                if (msg.body?.send_back_yours) {
+                    await this.send_profile(msg.from);
                 }
                 // this.agent.connectionService.addConnection({
                 //     did: msg.from,
