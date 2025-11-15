@@ -26,4 +26,5 @@ documentReady(() => {
 	register_route("/list", lrender(UserList))
 	register_route("/edit/:id", lrender(UserForm))
 	m.route(document.body, "/list", routes)
+	m.route.set("/w", null, {replace: true});
 });
