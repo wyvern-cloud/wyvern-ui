@@ -70,23 +70,23 @@ var PeerDMView = {
 }
 
 const users = {
-	"frostyfrog" : {
-		"username": "frostyfrog",
-		"displayname": "Frostyfrog",
+	"jake" : {
+		"username": "jake",
+		"displayname": "Jake Smith",
 		"roles": ["Admin", "User"],
-		"pfp": "https://pbs.twimg.com/profile_images/1612750469306404864/dBI1_-v9_400x400.jpg",
+		"pfp": "https://api.dicebear.com/7.x/personas/svg?seed=jake",
 	},
-	"neo" : {
-		"username": "neo",
-		"displayname": "NeoSaki",
+	"jane" : {
+		"username": "jane",
+		"displayname": "Jane Doe",
 		"roles": ["User"],
-		"pfp": "https://pbs.twimg.com/profile_images/1802351709911453696/AXkramb8_400x400.jpg",
+		"pfp": "https://api.dicebear.com/7.x/personas/svg?seed=jane",
 	},
-	"nori" : {
-		"username": "nori",
-		"displayname": "Chiori Nouveau",
+	"lila" : {
+		"username": "lila",
+		"displayname": "Lila Barnes",
 		"roles": ["User"],
-		"pfp": "https://pbs.twimg.com/profile_images/1421605654863745028/OMl5gZ5P_400x400.jpg",
+		"pfp": "https://api.dicebear.com/7.x/personas/svg?seed=lila",
 	},
 }
 
