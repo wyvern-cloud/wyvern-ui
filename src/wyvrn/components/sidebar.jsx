@@ -7,8 +7,7 @@ import { GLOBAL_PREFIX } from '../utils/constants';
 
 var Servers = [
 	{ id: 1, name: "Wyvrn Official Server"},
-	{ id: 2, name: "Frosty's Kitty Family"},
-	{ id: 3, name: "Wolkins Family"},
+	{ id: 2, name: "Wyvrn Test Server"},
 ]
 
 var ServerList = {
