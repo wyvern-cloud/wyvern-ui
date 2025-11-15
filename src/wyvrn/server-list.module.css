@@ -177,6 +177,7 @@
 .chatArea {
 	flex-grow: 1;
 	overflow-y: auto;
+	border-bottom: 1px solid color-mix(in srgb, var(--chatlog-bg-color) 80%, white 20%);
 }
 /* ===== Scrollbar CSS ===== */
   /* Firefox */
@@ -214,7 +215,6 @@
 	margin: 0;
 	padding: 10px;
 	border: 0;
-	border-top: 1px solid #ccc;
 	outline: none;
 	resize: none;
 	display:flex;
@@ -247,12 +247,14 @@
 
 .subList {
 	flex-grow: 1;
-	background-color: rgb(from var(--textarea-bg-color) calc(r + 20) calc(g + 20) calc(b + 20));
+	background-color: color-mix(in srgb, var(--server-list-bg-color) 100%, black 10%);
+	border-left: 1px solid color-mix(in srgb, var(--server-list-bg-color) 100%, black 30%);
+	border-bottom: 1px solid color-mix(in srgb, var(--server-list-bg-color) 100%, black 30%);
 	display: flex;
 	flex-direction: column;
 }
 .myUserInfo {
-	height: fit-content;
+	height: 4rem;
 	background-color: var(--server-list-bg-color);
 }
 .userList .systemEntry:first-child {
