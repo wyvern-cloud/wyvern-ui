@@ -1,0 +1,486 @@
+.settingsPanel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--dark-bg-color);
+  color: var(--dark-color);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--darker-bg-color);
+  position: sticky;
+  top: 0;
+  background-color: var(--dark-bg-color);
+  z-index: 1;
+}
+
+.header h2 {
+  margin: 0 0 0 16px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: #b9bbbe;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+.closeButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.content {
+  padding: 24px 32px;
+  flex: 1;
+  overflow-y: auto;
+  background-color: var(--dark-bg-color);
+}
+
+.section {
+  margin-bottom: 32px;
+}
+
+.section h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.setting {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.description {
+  color: #b9bbbe;
+  font-size: 14px;
+  margin-top: 4px;
+  margin-bottom: 16px;
+}
+
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 24px;
+  cursor: pointer; /* Add cursor pointer */
+}
+
+.toggle input {
+  opacity: 0; /* Make input invisible */
+  width: 100%; /* Full width of container */
+  height: 100%; /* Full height of container */
+  margin: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2; /* Ensure input is on top */
+  cursor: pointer;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #72767d;
+  transition: .4s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #7289da;
+}
+
+input:checked + .slider:before {
+  transform: translateX(16px);
+}
+
+.dangerButton {
+  background-color: #f04747;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 3px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.dangerButton:hover {
+  background-color: #d84040;
+}
+
+select {
+  background-color: var(--darker-bg-color);
+  color: var(--dark-color);
+  border: none;
+  padding: 8px 12px;
+  border-radius: 3px;
+  font-size: 14px;
+}
+
+/* New styles for theme section */
+.themeSection {
+  margin-bottom: 24px;
+}
+
+.themeDescription {
+  color: #b9bbbe;
+  font-size: 14px;
+  margin-top: 4px;
+  margin-bottom: 16px;
+}
+
+/* Settings Body Layout */
+.settingsBody {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Sidebar Navigation */
+.sidebar {
+  width: 240px;
+  background-color: var(--darker-bg-color);
+  border-right: 1px solid var(--border-color, #444);
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.sidebarNav {
+  padding: 16px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebarItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  background: none;
+  border: none;
+  border-left: 3px solid transparent;
+  color: var(--text-secondary, #aaa);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.sidebarItem:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--text-color, #fff);
+}
+
+.activeSidebarItem {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-left-color: var(--highlight-color, #7289da);
+  color: var(--text-color, #fff) !important;
+}
+
+.sidebarIcon {
+  font-size: 18px;
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.sidebarLabel {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.tabContent {
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Settings Items */
+.settingItem {
+  padding: 16px;
+  background: var(--darker-bg-color, #2f3136);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  transition: background 0.2s ease;
+}
+
+.settingItem:hover {
+  background: color-mix(in srgb, var(--darker-bg-color, #2f3136) 90%, white 10%);
+}
+
+.settingLabel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  width: 100%;
+}
+
+.settingLabel input[type="checkbox"] {
+  cursor: pointer;
+}
+
+.settingTitle {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-color, #fff);
+  margin-bottom: 4px;
+}
+
+.settingDescription {
+  font-size: 13px;
+  color: var(--text-secondary, #aaa);
+}
+
+/* Profile Section */
+.profilePictureSection {
+  margin-bottom: 24px;
+}
+
+.profilePictureSection label {
+  display: block;
+  margin-bottom: 12px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.profilePicturePreview {
+  width: 120px;
+  height: 120px;
+  border-radius: 60px;
+  overflow: hidden;
+  margin: 16px 0;
+  border: 3px solid var(--border-color, #444);
+}
+
+.profilePicturePreview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.formGroup {
+  margin-bottom: 24px;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.formHint {
+  font-size: 12px;
+  color: var(--text-secondary, #aaa);
+  margin-top: 8px;
+}
+
+.input,
+.textarea,
+.select {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--darker-bg-color, #2f3136);
+  border: 1px solid var(--border-color, #444);
+  border-radius: 4px;
+  color: var(--text-color, #fff);
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.input:focus,
+.textarea:focus,
+.select:focus {
+  outline: none;
+  border-color: var(--highlight-color, #7289da);
+}
+
+/* File Input */
+.fileInput {
+  display: none;
+}
+
+.fileInputLabel {
+  display: inline-block;
+  padding: 10px 20px;
+  background: var(--darker-bg-color, #2f3136);
+  color: var(--text-color, #fff);
+  border: 1px solid var(--border-color, #444);
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.fileInputLabel:hover {
+  background: color-mix(in srgb, var(--darker-bg-color, #2f3136) 85%, white 15%);
+  border-color: var(--highlight-color, #7289da);
+}
+
+.cropperActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.primaryButton {
+  padding: 10px 20px;
+  background: var(--highlight-color, #7289da);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.primaryButton:hover {
+  background: color-mix(in srgb, var(--highlight-color, #7289da) 85%, white 15%);
+}
+
+.secondaryButton {
+  padding: 10px 20px;
+  background: var(--darker-bg-color, #2f3136);
+  color: var(--text-color, #fff);
+  border: 1px solid var(--border-color, #444);
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.secondaryButton:hover {
+  background: color-mix(in srgb, var(--darker-bg-color, #2f3136) 85%, white 15%);
+}
+
+/* Backup Section */
+.backupActions {
+  margin: 20px 0;
+}
+
+.backupActions button {
+  margin-bottom: 8px;
+}
+
+/* Advanced Section */
+.advancedActions {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.advancedActions button {
+  width: fit-content;
+}
+
+.warningButton {
+  background-color: #ffc107;
+  color: #000;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.warningButton:hover {
+  background-color: #ffca28;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .settingsBody {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color, #444);
+    overflow-x: auto;
+    overflow-y: visible;
+  }
+
+  .sidebarNav {
+    flex-direction: row;
+    padding: 0;
+  }
+
+  .sidebarItem {
+    border-left: none;
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+    padding: 12px 16px;
+  }
+
+  .activeSidebarItem {
+    border-left-color: transparent;
+    border-bottom-color: var(--highlight-color, #7289da);
+  }
+
+  .content {
+    padding: 16px;
+  }
+}
