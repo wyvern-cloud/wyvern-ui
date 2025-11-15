@@ -321,6 +321,12 @@ select {
   font-size: 14px;
 }
 
+.formHint {
+  font-size: 12px;
+  color: var(--text-secondary, #aaa);
+  margin-top: 8px;
+}
+
 .input,
 .textarea,
 .select {

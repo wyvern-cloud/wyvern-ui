@@ -20,9 +20,35 @@ const ProfileStage = {
   view: (vnode) => {
     const data = onboardingService.getData();
     
-    const handleDisplayNameInput = (e) => {
+    const handleDisplayNameInput = async (e) => {
       vnode.state.displayName = e.target.value;
       onboardingService.updateData({ displayName: e.target.value });
+      
+      // If using default pfp, regenerate it with the new name
+      if (vnode.state.useDefaultPfp && e.target.value) {
+        const dicebearUrl = `https://api.dicebear.com/7.x/personas/svg?seed=${encodeURIComponent(e.target.value)}`;
+        
+        try {
+          const response = await fetch(dicebearUrl);
+          const svgText = await response.text();
+          const svgBlob = new Blob([svgText], { type: 'image/svg+xml' });
+          const reader = new FileReader();
+          
+          reader.onload = (event) => {
+            const dataUrl = event.target.result;
+            vnode.state.profilePicture = dataUrl;
+            onboardingService.updateData({ profilePicture: dataUrl });
+            m.redraw();
+          };
+          
+          reader.readAsDataURL(svgBlob);
+        } catch (error) {
+          console.error('Failed to convert Dicebear image to data URL:', error);
+          // Fallback to URL if conversion fails
+          vnode.state.profilePicture = dicebearUrl;
+          onboardingService.updateData({ profilePicture: dicebearUrl });
+        }
+      }
     };
 
     const handleDescriptionInput = (e) => {
@@ -36,18 +62,39 @@ const ProfileStage = {
       onboardingService.updateData({ profilePicture: e.target.value });
     };
 
-    const handleUseDefaultPfp = (e) => {
+    const handleUseDefaultPfp = async (e) => {
       vnode.state.useDefaultPfp = e.target.checked;
       vnode.state.useUploadedImage = false;
       vnode.state.showCropper = false;
       if (e.target.checked) {
-        const defaultPfp = vnode.state.displayName 
-          ? `https://api.dicebear.com/7.x/personas/svg?seed=${encodeURIComponent(vnode.state.displayName)}`
-          : '';
-        vnode.state.profilePicture = defaultPfp;
-        onboardingService.updateData({ profilePicture: defaultPfp });
+        const displayName = vnode.state.displayName || 'default';
+        const dicebearUrl = `https://api.dicebear.com/7.x/personas/svg?seed=${encodeURIComponent(displayName)}`;
+        
+        // Convert SVG to data URL
+        try {
+          const response = await fetch(dicebearUrl);
+          const svgText = await response.text();
+          const svgBlob = new Blob([svgText], { type: 'image/svg+xml' });
+          const reader = new FileReader();
+          
+          reader.onload = (event) => {
+            const dataUrl = event.target.result;
+            vnode.state.profilePicture = dataUrl;
+            onboardingService.updateData({ profilePicture: dataUrl });
+            m.redraw();
+          };
+          
+          reader.readAsDataURL(svgBlob);
+        } catch (error) {
+          console.error('Failed to convert Dicebear image to data URL:', error);
+          // Fallback to URL if conversion fails
+          vnode.state.profilePicture = dicebearUrl;
+          onboardingService.updateData({ profilePicture: dicebearUrl });
+          m.redraw();
+        }
+      } else {
+        m.redraw();
       }
-      m.redraw();
     };
 
     const handleFileSelect = (e) => {

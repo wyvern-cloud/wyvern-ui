@@ -151,6 +151,30 @@ const SettingsPanel = {
     }
   },
 
+  generateDicebearAvatar: async (vnode) => {
+    const displayName = vnode.state.profile.displayName || 'default';
+    const dicebearUrl = `https://api.dicebear.com/7.x/personas/svg?seed=${encodeURIComponent(displayName)}`;
+    
+    try {
+      const response = await fetch(dicebearUrl);
+      const svgText = await response.text();
+      const svgBlob = new Blob([svgText], { type: 'image/svg+xml' });
+      const reader = new FileReader();
+      
+      reader.onload = (event) => {
+        const dataUrl = event.target.result;
+        vnode.state.profile.profilePicture = dataUrl;
+        SettingsPanel.saveProfile(vnode);
+        m.redraw();
+      };
+      
+      reader.readAsDataURL(svgBlob);
+    } catch (error) {
+      console.error('Failed to generate Dicebear avatar:', error);
+      alert('Failed to generate avatar. Please try again.');
+    }
+  },
+
   view: (vnode) => {
     const tabs = [
       { id: 'appearance', label: 'Appearance', icon: '🎨' },
@@ -273,6 +297,16 @@ const SettingsPanel = {
                       <label for="profile-image-input" class={styles.fileInputLabel}>
                         {vnode.state.profile.profilePicture ? 'Change Image' : 'Upload Image'}
                       </label>
+                      <button
+                        class={styles.secondaryButton}
+                        onclick={() => SettingsPanel.generateDicebearAvatar(vnode)}
+                        style="margin-left: 8px;"
+                      >
+                        Generate Avatar
+                      </button>
+                      <div class={styles.formHint}>
+                        Upload a custom image or generate an avatar based on your display name
+                      </div>
                     </>
                   )}
                 </div>
