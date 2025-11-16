@@ -29,6 +29,19 @@ const TermsStage = {
           </p>
         </div>
 
+        <div class={styles.infoBox}>
+          <div class={styles.infoTitle}>
+            <strong>ℹ️ Wyvrn is a Work In Progress!</strong>
+          </div>
+          <div class={styles.infoText}>
+            Wyvrn is currently in active development. The terms and privacy policy
+            outlined here may change as we continue to build and improve the application.
+            By accepting these terms, you acknowledge that Wyvrn is provided "as is"
+            without warranties of any kind. Please stay updated with our latest releases
+            for any changes to these policies.
+          </div>
+        </div>
+
         {/* Terms of Service Document */}
         <div class={styles.termsDocument}>
           <h3>Terms of Service</h3>
