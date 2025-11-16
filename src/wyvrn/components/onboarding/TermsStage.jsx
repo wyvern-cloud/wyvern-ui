@@ -101,6 +101,15 @@ const TermsStage = {
           </div>
         </div>
 
+        {/* Validation Warning */}
+        {!onboardingService.canGoNext() && (vnode.state.acceptedTerms || vnode.state.acceptedPrivacy) && (
+          <div class={styles.validationError}>
+            <div class={styles.validationErrorText}>
+              {onboardingService.getValidationMessage()}
+            </div>
+          </div>
+        )}
+
         {/* Acceptance Checkboxes */}
         <div class={styles.acceptanceSection}>
           <div class={styles.settingItem}>
@@ -133,14 +142,6 @@ const TermsStage = {
             </label>
           </div>
         </div>
-
-        {!onboardingService.canGoNext() && (vnode.state.acceptedTerms || vnode.state.acceptedPrivacy) && (
-          <div class={styles.validationError}>
-            <div class={styles.validationErrorText}>
-              {onboardingService.getValidationMessage()}
-            </div>
-          </div>
-        )}
       </div>
     );
   }
